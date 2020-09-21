@@ -2,9 +2,13 @@
 {
     internal static class VendrConstants
     {
+        public const string Group = "vendr";
+
         internal static class Serialization
         {
             public const string Store = "Store";
+            public const string Currency = "Currency";
+            public const string Country = "Country";
         }
 
         internal static class Priorites
@@ -12,6 +16,8 @@
             public const int VENDR_RESERVED_LOWER = 3000;
             public const int VENDR_RESERVED_UPPER = 4000;
             public const int Stores = 3010;
+            public const int Country = 3020;
+            public const int Currency = 3030;
 
             //public const int Templates = 1020;
             //public const int ContentTypes = 1030;

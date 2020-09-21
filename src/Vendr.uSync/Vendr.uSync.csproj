@@ -157,10 +157,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\CountryHandler.cs" />
+    <Compile Include="Handlers\CurrencyHandler.cs" />
     <Compile Include="Handlers\StoreHandler.cs" />
+    <Compile Include="Handlers\VendrSyncHandlerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serializers\CountrySerializer.cs" />
+    <Compile Include="Serializers\CurrencySerializer.cs" />
     <Compile Include="Serializers\StoreSerializer.cs" />
     <Compile Include="VendrConstants.cs" />
+    <Compile Include="VendrSyncComposer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

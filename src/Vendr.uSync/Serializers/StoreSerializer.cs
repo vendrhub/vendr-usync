@@ -45,7 +45,7 @@ namespace Vendr.uSync.Serializers
                 Store store;
                 if (readOnlyStore == null)
                 {
-                    store = Store.Create(uow, node.GetAlias(), name);
+                    store = Store.Create(uow, node.GetAlias(), name, false);
                 }
                 else
                 {

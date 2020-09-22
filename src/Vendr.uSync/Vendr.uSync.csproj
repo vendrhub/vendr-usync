@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Config\uSync8.config.install.xdt" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

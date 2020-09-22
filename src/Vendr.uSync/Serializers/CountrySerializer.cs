@@ -47,7 +47,7 @@ namespace Vendr.uSync.Serializers
                 Country country;
                 if (readOnlyCountry == null)
                 {
-                    country = Country.Create(uow, storeId, code, name);
+                    country = Country.Create(uow, id, storeId, code, name);
                 }
                 else
                 {

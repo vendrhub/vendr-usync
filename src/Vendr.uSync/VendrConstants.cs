@@ -9,29 +9,34 @@
             public const string Store = "Store";
             public const string Currency = "Currency";
             public const string Country = "Country";
+            public const string Region = "Region";
+
+            public const string TaxClass = "TaxClass";
+
+            public const string EmailTemplate = "EmailTemplate";
+            public const string OrderStatus = "OrderStatus";
+
+            public const string PaymentMethod = "PaymentMethod";
+            public const string ShippingMethod = "ShippingMethod";
         }
 
         internal static class Priorites
         {
             public const int VENDR_RESERVED_LOWER = 3000;
             public const int VENDR_RESERVED_UPPER = 4000;
-            public const int Stores = 3010;
-            public const int Country = 3020;
-            public const int Currency = 3030;
+            public const int Stores = VENDR_RESERVED_LOWER + 10;
 
-            //public const int Templates = 1020;
-            //public const int ContentTypes = 1030;
-            //public const int MediaTypes = 1040;
-            //public const int MemberTypes = 1045;
-            //public const int Languages = 1005;
-            //public const int DictionaryItems = 1006;
-            //public const int Macros = 1070;
-            //public const int Media = 1200;
-            //public const int Content = 1210;
-            //public const int ContentTemplate = 1215;
-            //public const int DomainSettings = 1219;
-            //public const int DataTypeMappings = 1220;
-            //public const int RelationTypes = 1230;
+            public const int Currency = VENDR_RESERVED_LOWER + 20;
+            public const int Country = VENDR_RESERVED_LOWER + 30;
+            public const int Region = VENDR_RESERVED_LOWER + 40;
+
+            public const int TaxClass = VENDR_RESERVED_LOWER + 100;
+
+            public const int EmailTemplate = VENDR_RESERVED_LOWER + 110;
+            public const int OrderStatus = VENDR_RESERVED_LOWER + 120;
+
+            public const int PaymentMethod = VENDR_RESERVED_LOWER + 210;
+            public const int ShippingMethod = VENDR_RESERVED_LOWER + 220;
         }
     }
 }

@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-
-using Microsoft.AspNet.Identity;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
@@ -21,8 +15,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Serializers
 {
-    [SyncSerializer("A5C0B948-BA5F-45FF-B6E6-EBA0BB3C6139", "Country Serializer",
-        VendrConstants.Serialization.Country)]
+    [SyncSerializer("A5C0B948-BA5F-45FF-B6E6-EBA0BB3C6139", "Country Serializer", VendrConstants.Serialization.Country)]
     public class CountrySerializer : SyncSerializerRoot<CountryReadOnly>,
         ISyncSerializer<CountryReadOnly>
     {
@@ -49,7 +42,7 @@ namespace Vendr.uSync.Serializers
             var storeId = node.Element(nameof(readOnlyCountry.StoreId)).ValueOrDefault(Guid.Empty);
             var code = node.Element(nameof(readOnlyCountry.Code)).ValueOrDefault(string.Empty);
 
-            using(var uow = _uowProvider.Create())
+            using (var uow = _uowProvider.Create())
             {
                 Country country;
                 if (readOnlyCountry == null)

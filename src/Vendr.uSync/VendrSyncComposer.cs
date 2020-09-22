@@ -20,6 +20,15 @@ namespace Vendr.uSync
             composition.Register<ISyncSerializer<StoreReadOnly>, StoreSerializer>();
             composition.Register<ISyncSerializer<CurrencyReadOnly>, CurrencySerializer>();
             composition.Register<ISyncSerializer<CountryReadOnly>, CountrySerializer>();
+
+            composition.Register<ISyncSerializer<EmailTemplateReadOnly>, EmailTemplateSerializer>();
+            composition.Register<ISyncSerializer<OrderStatusReadOnly>, OrderStatusSerializer>();
+            composition.Register<ISyncSerializer<PaymentMethodReadOnly>, PaymentMethodSeralizer>();
+
+            composition.Register<ISyncSerializer<RegionReadOnly>, RegionSerializer>();
+            composition.Register<ISyncSerializer<ShippingMethodReadOnly>, ShippingMethodSerializer>();
+            composition.Register<ISyncSerializer<TaxClassReadOnly>, TaxClassSerializer>();
+
         }
     }
 }

@@ -21,7 +21,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     public abstract class VendrSyncHandlerBase<TObject> :
-        SyncHandlerRoot<TObject, TObject> 
+        SyncHandlerRoot<TObject, TObject>
         where TObject : EntityBase
     {
         protected IVendrApi _vendrApi;
@@ -36,6 +36,24 @@ namespace Vendr.uSync.Handlers
             : base(logger, appCaches, serializer, itemFactory, syncFileService)
         {
             _vendrApi = vendrApi;
+        }
+
+        /// <summary>
+        ///  get the item by store 
+        /// </summary>
+        protected virtual IEnumerable<TObject> GetByStore(Guid storeId)
+            => Enumerable.Empty<TObject>();
+
+        protected override IEnumerable<TObject> GetChildItems(TObject parent)
+        {
+            if (parent != null) return Enumerable.Empty<TObject>();
+
+            var items = new List<TObject>();
+            foreach (var store in _vendrApi.GetStores())
+            {
+                items.AddRange(GetByStore(store.Id));
+            }
+            return items;
         }
 
         public virtual IEnumerable<uSyncAction> ProcessPostImport(string folder, IEnumerable<uSyncAction> actions, HandlerSettings config)

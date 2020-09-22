@@ -17,8 +17,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrStoreHandler", "Store", "vendr\\Stores",
-        VendrConstants.Priorites.Stores,
+    [SyncHandler("vendrStoreHandler", "Stores", "vendr\\Stores", VendrConstants.Priorites.Stores,
         Icon = "icon-store")]
     public class StoreHandler : VendrSyncHandlerBase<StoreReadOnly>, ISyncPostImportHandler, ISyncExtendedHandler
     {

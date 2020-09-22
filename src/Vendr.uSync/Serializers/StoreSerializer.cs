@@ -4,7 +4,6 @@ using System.Xml.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
-using Umbraco.Core.Models.Identity;
 using Umbraco.Core.Services;
 
 using uSync8.Core;
@@ -19,10 +18,8 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("d4d2593e-04ad-4a32-9ca7-e2a5b2ff2725", "Store Serializer", VendrConstants.Serialization.Store)]
-    public class StoreSerializer : SyncSerializerRoot<StoreReadOnly>, ISyncSerializer<StoreReadOnly>
+    public class StoreSerializer : VendrSerializerBase<StoreReadOnly>, ISyncSerializer<StoreReadOnly>
     {
-        private IVendrApi _vendrApi;
-        private IUnitOfWorkProvider _uowProvider;
         private IUserService _userService;
 
         public StoreSerializer(
@@ -30,12 +27,9 @@ namespace Vendr.uSync.Serializers
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
             ILogger logger)
-            : base(logger)
+            : base(vendrApi, uowProvider, logger)
         {
             _userService = userService;
-
-            _vendrApi = vendrApi;
-            _uowProvider = uowProvider;
         }
 
         protected override SyncAttempt<StoreReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
@@ -67,7 +61,7 @@ namespace Vendr.uSync.Serializers
                 store.SetPriceTaxInclusivity(node.Element(nameof(store.PricesIncludeTax)).ValueOrDefault(false));
 
                 store.SetCartNumberTemplate(node.Element(nameof(store.CartNumberTemplate)).ValueOrDefault(string.Empty));
-                
+
                 store.SetProductPropertyAliases(node.Element(nameof(store.ProductPropertyAliases)).ValueOrDefault(string.Empty)
                     .ToDelimitedList());
 
@@ -83,7 +77,7 @@ namespace Vendr.uSync.Serializers
                 DeserializeAllowedUsers(node, store);
 
                 DeserializeAllowedRoles(node, store);
-                 
+
                 _vendrApi.SaveStore(store);
 
                 uow.Complete();
@@ -114,7 +108,7 @@ namespace Vendr.uSync.Serializers
                 }
             }
 
-            store.SetAllowedUserRoles(roleIds, SetBehavior.Merge);
+            store.SetAllowedUserRoles(roleIds, SetBehavior.Replace);
         }
 
         private void DeserializeAllowedUsers(XElement node, Store store)
@@ -260,7 +254,7 @@ namespace Vendr.uSync.Serializers
         /// </summary>
         private Guid? GetStoreId(XElement node, string name)
             => GetVendrIdFromXml(node, name, _vendrApi.GetStore);
-       
+
 
         protected override SyncAttempt<XElement> SerializeCore(StoreReadOnly item, SyncSerializerOptions options)
         {
@@ -312,7 +306,7 @@ namespace Vendr.uSync.Serializers
 
             if (item.AllowedUsers.Count > 0)
             {
-                foreach(var id in item.AllowedUsers)
+                foreach (var id in item.AllowedUsers)
                 {
                     var user = _userService.GetByProviderKey(id.UserId);
                     if (user != null)
@@ -330,7 +324,7 @@ namespace Vendr.uSync.Serializers
             var allowedRoles = new XElement(nameof(item.AllowedUserRoles));
             if (item.AllowedUserRoles.Count > 0)
             {
-                foreach(var role in item.AllowedUserRoles)
+                foreach (var role in item.AllowedUserRoles)
                 {
                     var group = _userService.GetUserGroupByAlias(role.Role);
                     if (group != null)

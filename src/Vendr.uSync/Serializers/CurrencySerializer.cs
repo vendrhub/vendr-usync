@@ -16,8 +16,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Serializers
 {
-    [SyncSerializer("79ED6CC2-B1B6-42DC-9B38-7C6ACCBAF895", "Currency Serializer",
-        VendrConstants.Serialization.Currency)]
+    [SyncSerializer("79ED6CC2-B1B6-42DC-9B38-7C6ACCBAF895", "Currency Serializer", VendrConstants.Serialization.Currency)]
     public class CurrencySerializer : SyncSerializerRoot<CurrencyReadOnly>,
         ISyncSerializer<CurrencyReadOnly>
     {
@@ -27,7 +26,7 @@ namespace Vendr.uSync.Serializers
         public CurrencySerializer(
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
-            ILogger logger            
+            ILogger logger
             ) : base(logger)
         {
             _vendrApi = vendrApi;
@@ -45,7 +44,7 @@ namespace Vendr.uSync.Serializers
             var code = node.Element(nameof(readOnlyCurrency.Code)).ValueOrDefault(string.Empty);
             var culture = node.Element(nameof(readOnlyCurrency.CultureName)).ValueOrDefault(string.Empty);
 
-            using(var uow = _uowProvider.Create())
+            using (var uow = _uowProvider.Create())
             {
                 Currency currency;
                 if (readOnlyCurrency == null)
@@ -89,16 +88,16 @@ namespace Vendr.uSync.Serializers
                 .Select(x => x.CountryId);
 
 
-            foreach(var countryGuid in allowedCountries)
+            foreach (var countryGuid in allowedCountries)
             {
                 currency.AllowInCountry(countryGuid);
             }
 
-            foreach(var countryGuid in countriesToRemove)
+            foreach (var countryGuid in countriesToRemove)
             {
                 currency.DisallowInCountry(countryGuid);
             }
-          
+
 
         }
 
@@ -134,7 +133,7 @@ namespace Vendr.uSync.Serializers
 
         protected override void SaveItem(CurrencyReadOnly item)
         {
-            using(var uow = _uowProvider.Create())
+            using (var uow = _uowProvider.Create())
             {
                 var entity = item.AsWritable(uow);
                 _vendrApi.SaveCurrency(entity);

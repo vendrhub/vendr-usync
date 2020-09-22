@@ -184,6 +184,7 @@
     <Compile Include="SyncModels\SyncAllowedCountryRegionModel.cs" />
     <Compile Include="SyncModels\SyncServicePriceModel.cs" />
     <Compile Include="VendrConstants.cs" />
+    <Compile Include="VendrSync.cs" />
     <Compile Include="VendrSyncComposer.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -16,21 +16,15 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("A5C0B948-BA5F-45FF-B6E6-EBA0BB3C6139", "Country Serializer", VendrConstants.Serialization.Country)]
-    public class CountrySerializer : SyncSerializerRoot<CountryReadOnly>,
+    public class CountrySerializer : VendrSerializerBase<CountryReadOnly>,
         ISyncSerializer<CountryReadOnly>
     {
-        private IVendrApi _vendrApi;
-        private IUnitOfWorkProvider _uowProvider;
-
         public CountrySerializer(
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
             ILogger logger
-            ) : base(logger)
-        {
-            _vendrApi = vendrApi;
-            _uowProvider = uowProvider;
-        }
+            ) : base(vendrApi, uowProvider, logger)
+        {}
 
         protected override SyncAttempt<CountryReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -98,14 +92,8 @@ namespace Vendr.uSync.Serializers
         protected override CountryReadOnly FindItem(Guid key)
            => _vendrApi.GetCountry(key);
 
-        protected override CountryReadOnly FindItem(string alias)
-            => null;
-
         protected override string ItemAlias(CountryReadOnly item)
             => item.Name.ToSafeAlias();
-
-        protected override Guid ItemKey(CountryReadOnly item)
-            => item.Id;
 
         protected override void SaveItem(CountryReadOnly item)
         {

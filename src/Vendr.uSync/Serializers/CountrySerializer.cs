@@ -55,13 +55,19 @@ namespace Vendr.uSync.Serializers
                 country.SetSortOrder(sortOrder);
 
                 var defaultCurrencyId = node.Element(nameof(country.DefaultCurrencyId)).ValueOrDefault(country.DefaultCurrencyId);
-                country.SetDefaultCurrency(defaultCurrencyId);
+                if (_vendrApi.GetCurrency(defaultCurrencyId.Value) != null) {
+                    country.SetDefaultCurrency(defaultCurrencyId);
+                }
 
                 var defaultPaymentId = node.Element(nameof(country.DefaultPaymentMethodId)).ValueOrDefault(country.DefaultPaymentMethodId);
-                country.SetDefaultPaymentMethod(defaultPaymentId);
+                if (_vendrApi.GetPaymentMethod(defaultPaymentId.Value) != null) {
+                    country.SetDefaultPaymentMethod(defaultPaymentId);
+                }
 
                 var defaultShippingId = node.Element(nameof(country.DefaultShippingMethodId)).ValueOrDefault(country.DefaultShippingMethodId);
-                country.SetDefaultShippingMethod(defaultShippingId);
+                if (_vendrApi.GetShippingMethod(defaultShippingId.Value) != null) {
+                    country.SetDefaultShippingMethod(defaultShippingId);
+                }
 
                 _vendrApi.SaveCountry(country);
 

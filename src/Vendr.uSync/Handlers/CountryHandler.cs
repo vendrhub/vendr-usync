@@ -16,6 +16,13 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
+    /// <summary>
+    ///  Handler for Country entries in vendr
+    /// </summary>
+    /// <remarks>
+    ///  PostImportHandler means the import is ran again at the end, because it depends on payment & shipping
+    ///  which have to run after country as they depend on them.
+    /// </remarks>
     [SyncHandler("vendrCountryHandler", "Countries", "vendr\\Country", VendrConstants.Priorites.Country,
         Icon = "icon-globe")]
     public class CountryHandler : VendrSyncHandlerBase<CountryReadOnly>, ISyncPostImportHandler, ISyncExtendedHandler

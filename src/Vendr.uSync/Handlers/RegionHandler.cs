@@ -18,7 +18,7 @@ namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrRegionHandler", "Regions", "vendr\\Region", VendrConstants.Priorites.Region,
         Icon = "icon-flag-alt")]
-    public class RegionHandler : VendrSyncHandlerBase<RegionReadOnly>, ISyncExtendedHandler
+    public class RegionHandler : VendrSyncHandlerBase<RegionReadOnly>, ISyncExtendedHandler, ISyncPostImportHandler
     {
         public override string Group => VendrConstants.Group;
 

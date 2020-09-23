@@ -90,7 +90,10 @@ namespace Vendr.uSync.Serializers
 
             foreach (var countryGuid in allowedCountries)
             {
-                currency.AllowInCountry(countryGuid);
+                if (_vendrApi.GetCountry(countryGuid) != null)
+                {
+                    currency.AllowInCountry(countryGuid);
+                }
             }
 
             foreach (var countryGuid in countriesToRemove)

@@ -60,16 +60,19 @@ namespace Vendr.uSync.Handlers
         {
             if (actions == null || !actions.Any()) return null;
 
+            var postActions = new List<uSyncAction>();
+
             foreach (var action in actions)
             {
                 var result = Import(action.FileName, config, SerializerFlags.None);
                 if (result.Success)
                 {
-                    ImportSecondPass(action.FileName, result.Item, config, null);
+                    var attempt = ImportSecondPass(action.FileName, result.Item, config, null);
+                    // postActions.Add();
                 }
             }
 
-            return actions;
+            return postActions;
         }
 
         /// <summary>

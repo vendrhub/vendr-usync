@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
 using Umbraco.Core.Logging;
@@ -48,7 +49,7 @@ namespace Vendr.uSync.Serializers
             var storeId = node.Element(nameof(readonlyItem.StoreId)).ValueOrDefault(Guid.Empty);
             var countryId = node.Element(nameof(readonlyItem.CountryId)).ValueOrDefault(Guid.Empty);
 
-            var code = node.Element(nameof(readonlyItem.Code)).ValueOrDefault(readonlyItem.Code);
+            var code = node.Element(nameof(readonlyItem.Code)).ValueOrDefault(string.Empty);
 
             if (storeId == Guid.Empty || countryId == Guid.Empty)
             {
@@ -70,8 +71,18 @@ namespace Vendr.uSync.Serializers
                 }
 
                 item.SetSortOrder(node.Element(nameof(item.SortOrder)).ValueOrDefault(item.SortOrder));
-                item.SetDefaultPaymentMethod(node.GetGuidValue(nameof(item.DefaultPaymentMethodId)));
-                item.SetDefaultShippingMethod(node.GetGuidValue(nameof(item.DefaultShippingMethodId)));
+
+                var paymentMethodId = node.GetGuidValue(nameof(item.DefaultPaymentMethodId));
+                if (paymentMethodId != null && _vendrApi.GetPaymentMethod(paymentMethodId.Value) != null)
+                {
+                    item.SetDefaultPaymentMethod(paymentMethodId);
+                }
+
+                var shippingMethodId = node.GetGuidValue(nameof(item.DefaultShippingMethodId));
+                if (shippingMethodId != null && _vendrApi.GetShippingMethod(shippingMethodId.Value) != null)
+                {
+                    item.SetDefaultShippingMethod(shippingMethodId);
+                }
 
                 _vendrApi.SaveRegion(item);
 

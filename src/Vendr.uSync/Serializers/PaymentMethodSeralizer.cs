@@ -30,22 +30,22 @@ namespace Vendr.uSync.Serializers
 
             node.Add(new XElement(nameof(item.Name), item.Name));
             node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.StoreId)), item.StoreId);
+            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
 
             node.Add(SerializeCountryRegions(item.AllowedCountryRegions));
 
-            node.Add(new XElement(nameof(item.CanCancelPayments)), item.CanCancelPayments);
-            node.Add(new XElement(nameof(item.CanCapturePayments)), item.CanCapturePayments);
-            node.Add(new XElement(nameof(item.CanFetchPaymentStatuses)), item.CanFetchPaymentStatuses);
-            node.Add(new XElement(nameof(item.CanRefundPayments)), item.CanRefundPayments);
+            node.Add(new XElement(nameof(item.CanCancelPayments), item.CanCancelPayments));
+            node.Add(new XElement(nameof(item.CanCapturePayments), item.CanCapturePayments));
+            node.Add(new XElement(nameof(item.CanFetchPaymentStatuses), item.CanFetchPaymentStatuses));
+            node.Add(new XElement(nameof(item.CanRefundPayments), item.CanRefundPayments));
 
             node.Add(SerializeProviderSettings(item.PaymentProviderSettings));
             node.Add(SerializePrices(item.Prices));
 
-            node.Add(new XElement(nameof(item.ImageId)), item.ImageId);
-            node.Add(new XElement(nameof(item.PaymentProviderAlias)), item.PaymentProviderAlias);
+            node.Add(new XElement(nameof(item.ImageId), item.ImageId));
+            node.Add(new XElement(nameof(item.PaymentProviderAlias), item.PaymentProviderAlias));
 
-            node.Add(new XElement(nameof(item.Sku)), item.Sku);
+            node.Add(new XElement(nameof(item.Sku), item.Sku));
             node.Add(new XElement(nameof(item.TaxClassId), item.TaxClassId));
 
             return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);

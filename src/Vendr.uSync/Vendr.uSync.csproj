@@ -189,7 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Config\uSync8.config.install.xdt" />
+    <None Include="Web\UI\Config\uSync8.config.install.xdt" />
     <None Include="packages.config" />
     <None Include="Web\UI\App_Plugins\Vendr.uSync\package.manifest" />
   </ItemGroup>

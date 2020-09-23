@@ -2,7 +2,7 @@
 {
     internal static class VendrConstants
     {
-        public const string Group = "vendr";
+        public const string Group = "Vendr";
 
         internal static class Serialization
         {

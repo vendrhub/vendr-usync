@@ -16,7 +16,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrCurrencyHandler", "Currencies", "vendr\\Currency", VendrConstants.Priorites.Currency,
+    [SyncHandler("vendrCurrencyHandler", "Currencies", "Vendr\\Currency", VendrConstants.Priorites.Currency,
         Icon = "icon-coins-dollar-alt")]
     public class CurrencyHandler : VendrSyncHandlerBase<CurrencyReadOnly>, ISyncExtendedHandler
     {

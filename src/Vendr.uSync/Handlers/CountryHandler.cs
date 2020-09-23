@@ -23,7 +23,7 @@ namespace Vendr.uSync.Handlers
     ///  PostImportHandler means the import is ran again at the end, because it depends on payment & shipping
     ///  which have to run after country as they depend on them.
     /// </remarks>
-    [SyncHandler("vendrCountryHandler", "Countries", "vendr\\Country", VendrConstants.Priorites.Country,
+    [SyncHandler("vendrCountryHandler", "Countries", "Vendr\\Country", VendrConstants.Priorites.Country,
         Icon = "icon-globe", IsTwoPass = true)]
     public class CountryHandler : VendrSyncHandlerBase<CountryReadOnly>, ISyncPostImportHandler, ISyncExtendedHandler
     {

@@ -16,7 +16,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrShippingMethodHandler", "Shipping Methods", "vendr\\ShippingMethod", VendrConstants.Priorites.ShippingMethod,
+    [SyncHandler("vendrShippingMethodHandler", "Shipping Methods", "Vendr\\ShippingMethod", VendrConstants.Priorites.ShippingMethod,
         Icon = "icon-truck")]
     public class ShippingMethodHandler : VendrSyncHandlerBase<ShippingMethodReadOnly>, ISyncExtendedHandler
     {

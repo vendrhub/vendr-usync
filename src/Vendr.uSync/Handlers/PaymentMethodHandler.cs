@@ -16,7 +16,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrPaymentMethodHandler", "Payment Methods", "vendr\\PaymentMethod", VendrConstants.Priorites.PaymentMethod,
+    [SyncHandler("vendrPaymentMethodHandler", "Payment Methods", "Vendr\\PaymentMethod", VendrConstants.Priorites.PaymentMethod,
         Icon = "icon-multiple-credit-cards")]
     public class PaymentMethodHandler : VendrSyncHandlerBase<PaymentMethodReadOnly>, ISyncExtendedHandler
     {

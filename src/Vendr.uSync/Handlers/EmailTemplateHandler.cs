@@ -16,7 +16,7 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrEmailTemplateHandler", "Email Templates", "vendr\\EmailTemplate", VendrConstants.Priorites.EmailTemplate,
+    [SyncHandler("vendrEmailTemplateHandler", "Email Templates", "Vendr\\EmailTemplate", VendrConstants.Priorites.EmailTemplate,
         Icon = "icon-mailbox")]
     public class EmailTemplateHandler : VendrSyncHandlerBase<EmailTemplateReadOnly>, ISyncExtendedHandler
     {

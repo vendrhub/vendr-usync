@@ -191,8 +191,11 @@
     <None Include="app.config" />
     <None Include="Config\uSync8.config.install.xdt" />
     <None Include="packages.config" />
+    <None Include="Web\UI\App_Plugins\Vendr.uSync\package.manifest" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Web\UI\App_Plugins\Vendr.uSync\lang\en-us.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\packages\Umbraco.SqlServerCE.4.0.0.1\build\Umbraco.SqlServerCE.targets" Condition="Exists('..\..\packages\Umbraco.SqlServerCE.4.0.0.1\build\Umbraco.SqlServerCE.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

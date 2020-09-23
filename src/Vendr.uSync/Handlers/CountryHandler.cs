@@ -24,7 +24,7 @@ namespace Vendr.uSync.Handlers
     ///  which have to run after country as they depend on them.
     /// </remarks>
     [SyncHandler("vendrCountryHandler", "Countries", "vendr\\Country", VendrConstants.Priorites.Country,
-        Icon = "icon-globe")]
+        Icon = "icon-globe", IsTwoPass = true)]
     public class CountryHandler : VendrSyncHandlerBase<CountryReadOnly>, ISyncPostImportHandler, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

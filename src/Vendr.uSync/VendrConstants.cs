@@ -38,7 +38,6 @@
 
             public const int Stores = VENDR_RESERVED_LOWER + 10; // has to be first **
 
-            public const int TaxClass = VENDR_RESERVED_LOWER + 20; // requires only on store.
             public const int EmailTemplate = VENDR_RESERVED_LOWER + 30; // requires only store
             public const int OrderStatus = VENDR_RESERVED_LOWER + 40; // requires only store
 
@@ -46,6 +45,8 @@
             public const int Region = VENDR_RESERVED_LOWER + 110; // requires store, country, paymeent and shipping **
 
             public const int Currency = VENDR_RESERVED_LOWER + 120;  // requires countries
+
+            public const int TaxClass = VENDR_RESERVED_LOWER + 130; // requires countries
 
             public const int PaymentMethod = VENDR_RESERVED_LOWER + 210; // requires store, countries, currencies
             public const int ShippingMethod = VENDR_RESERVED_LOWER + 220;// requires store, countries, currencies

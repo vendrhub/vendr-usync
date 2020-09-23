@@ -22,8 +22,9 @@
 
         internal static class Priorites
         {
-            public const int VENDR_RESERVED_LOWER = 3000;
-            public const int VENDR_RESERVED_UPPER = 4000;
+            // content runs at 1200, so by being just below, we will build a store before we sync content
+            public const int VENDR_RESERVED_LOWER = 1150;
+            public const int VENDR_RESERVED_UPPER = 1199;
 
             //
             // Handlers are marked with these priorities - setting the order things are imported
@@ -36,20 +37,20 @@
             // Stores, Country & Region are ISyncPostImportHandlers.
             //
 
-            public const int Stores = VENDR_RESERVED_LOWER + 10; // has to be first **
+            public const int Stores = VENDR_RESERVED_LOWER + 1; // has to be first **
 
-            public const int EmailTemplate = VENDR_RESERVED_LOWER + 30; // requires only store
-            public const int OrderStatus = VENDR_RESERVED_LOWER + 40; // requires only store
+            public const int EmailTemplate = VENDR_RESERVED_LOWER + 2; // requires only store
+            public const int OrderStatus = VENDR_RESERVED_LOWER + 3; // requires only store
 
-            public const int Country = VENDR_RESERVED_LOWER + 100; // requires store, currency, payment and shipping **
-            public const int Region = VENDR_RESERVED_LOWER + 110; // requires store, country, paymeent and shipping **
+            public const int Country = VENDR_RESERVED_LOWER + 10; // requires store, currency, payment and shipping **
+            public const int Region = VENDR_RESERVED_LOWER + 11; // requires store, country, paymeent and shipping **
 
-            public const int Currency = VENDR_RESERVED_LOWER + 120;  // requires countries
+            public const int Currency = VENDR_RESERVED_LOWER + 12;  // requires countries
 
-            public const int TaxClass = VENDR_RESERVED_LOWER + 130; // requires countries
+            public const int TaxClass = VENDR_RESERVED_LOWER + 13; // requires countries
 
-            public const int PaymentMethod = VENDR_RESERVED_LOWER + 210; // requires store, countries, currencies
-            public const int ShippingMethod = VENDR_RESERVED_LOWER + 220;// requires store, countries, currencies
+            public const int PaymentMethod = VENDR_RESERVED_LOWER + 21; // requires store, countries, currencies
+            public const int ShippingMethod = VENDR_RESERVED_LOWER + 22;// requires store, countries, currencies
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 
+using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 
 using Vendr.Core;
@@ -38,8 +39,7 @@ namespace Vendr.uSync.Serializers
 
         protected override TObject FindItem(string alias)
             => null;
-
-
+        
         protected XElement SerailizeList<TResult>(string collectionName, string elementName, IEnumerable<TResult> items)
         {
             var root = new XElement(collectionName);

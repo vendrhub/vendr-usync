@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Xml.Linq;
 
 using Umbraco.Core.Logging;
@@ -28,8 +27,9 @@ namespace Vendr.uSync.Serializers
             var node = InitializeBaseNode(item, ItemAlias(item));
 
             node.Add(new XElement(nameof(item.Name), item.Name));
+            node.AddStoreId(item.StoreId);
+
             node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
 
             node.Add(new XElement(nameof(item.Code), item.Code));
             node.Add(new XElement(nameof(item.CountryId), item.CountryId));
@@ -39,6 +39,11 @@ namespace Vendr.uSync.Serializers
             return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+                && node.GetStoreId() != Guid.Empty
+                && node.Element("CountryId").ValueOrDefault(Guid.Empty) != Guid.Empty;
+
         protected override SyncAttempt<RegionReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var readonlyItem = FindItem(node);
@@ -46,7 +51,7 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element(nameof(readonlyItem.Name)).ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readonlyItem.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
             var countryId = node.Element(nameof(readonlyItem.CountryId)).ValueOrDefault(Guid.Empty);
 
             var code = node.Element(nameof(readonlyItem.Code)).ValueOrDefault(string.Empty);

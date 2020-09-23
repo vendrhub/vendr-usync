@@ -13,6 +13,7 @@ using uSync8.Core.Serialization;
 using Vendr.Core;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+using Vendr.uSync.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -33,6 +34,27 @@ namespace Vendr.uSync.Serializers
             _uowProvider = uowProvider;
         }
 
+        protected override SyncAttempt<XElement> SerializeCore(CurrencyReadOnly item, SyncSerializerOptions options)
+        {
+            var node = InitializeBaseNode(item, ItemAlias(item));
+
+            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
+            node.AddStoreId(item.StoreId);
+
+            node.Add(new XElement(nameof(item.Code), item.Code));
+            node.Add(new XElement(nameof(item.CultureName), item.CultureName));
+            node.Add(new XElement(nameof(item.AllowedCountries), string.Join(",", item.AllowedCountries.Select(x => x.CountryId))));
+            node.Add(new XElement(nameof(item.FormatTemplate), item.FormatTemplate));
+
+            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+        }
+
+
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && node.GetStoreId() != Guid.Empty;
+
         protected override SyncAttempt<CurrencyReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var readOnlyCurrency = FindItem(node);
@@ -40,7 +62,7 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element("Name").ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readOnlyCurrency.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
             var code = node.Element(nameof(readOnlyCurrency.Code)).ValueOrDefault(string.Empty);
             var culture = node.Element(nameof(readOnlyCurrency.CultureName)).ValueOrDefault(string.Empty);
 
@@ -102,22 +124,6 @@ namespace Vendr.uSync.Serializers
             }
 
 
-        }
-
-
-        protected override SyncAttempt<XElement> SerializeCore(CurrencyReadOnly item, SyncSerializerOptions options)
-        {
-            var node = InitializeBaseNode(item, ItemAlias(item));
-
-            node.Add(new XElement("Name", item.Name));
-            node.Add(new XElement(nameof(item.Code), item.Code));
-            node.Add(new XElement(nameof(item.CultureName), item.CultureName));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
-            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.AllowedCountries), string.Join(",", item.AllowedCountries.Select(x => x.CountryId))));
-            node.Add(new XElement(nameof(item.FormatTemplate), item.FormatTemplate));
-
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         // overloads to let base functions do the bulk of the work.

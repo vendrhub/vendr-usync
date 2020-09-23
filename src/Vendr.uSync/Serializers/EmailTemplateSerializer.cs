@@ -11,6 +11,7 @@ using uSync8.Core.Serialization;
 using Vendr.Core;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+using Vendr.uSync.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -27,6 +28,8 @@ namespace Vendr.uSync.Serializers
             var node = InitializeBaseNode(item, ItemAlias(item));
 
             node.Add(new XElement(nameof(item.Name), item.Name));
+            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
+            node.AddStoreId(item.StoreId);
 
             node.Add(new XElement(nameof(item.Category), item.Category));
 
@@ -37,13 +40,16 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.SenderAddress), item.SenderAddress));
             node.Add(new XElement(nameof(item.SenderName), item.SenderName));
             node.Add(new XElement(nameof(item.SendToCustomer), item.SendToCustomer));
-            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
+            
             node.Add(new XElement(nameof(item.Subject), item.Subject));
             node.Add(new XElement(nameof(item.TemplateView), item.TemplateView));
 
             return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
+
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && node.GetStoreId() != Guid.Empty;
 
         protected override SyncAttempt<EmailTemplateReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -52,7 +58,7 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element(nameof(readOnlyItem.Name)).ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readOnlyItem.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
 
             using (var uow = _uowProvider.Create())
             {

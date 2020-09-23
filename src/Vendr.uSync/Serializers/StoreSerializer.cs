@@ -118,7 +118,9 @@ namespace Vendr.uSync.Serializers
             node.Add(allowedRoles);
         }
 
-
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && !string.IsNullOrWhiteSpace(node.Element("Name").ValueOrDefault(string.Empty));
 
         protected override SyncAttempt<StoreReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -133,7 +135,7 @@ namespace Vendr.uSync.Serializers
                 Store store;
                 if (readOnlyStore == null)
                 {
-                    store = Store.Create(uow, id, node.GetAlias(), name, false);
+                    store = Store.Create(uow, id, alias, name, false);
                 }
                 else
                 {

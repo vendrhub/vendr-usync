@@ -12,6 +12,7 @@ using uSync8.Core.Serialization;
 using Vendr.Core;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+using Vendr.uSync.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -26,6 +27,13 @@ namespace Vendr.uSync.Serializers
             ) : base(vendrApi, uowProvider, logger)
         {}
 
+        /// <summary>
+        ///  Confirm that the xml contains the minimum set of things we need to perform the sync.
+        /// </summary>
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && node.GetStoreId() != Guid.Empty;
+
         protected override SyncAttempt<CountryReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var readOnlyCountry = FindItem(node);
@@ -33,7 +41,7 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element("Name").ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readOnlyCountry.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
             var code = node.Element(nameof(readOnlyCountry.Code)).ValueOrDefault(string.Empty);
 
             using (var uow = _uowProvider.Create())
@@ -88,7 +96,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.DefaultPaymentMethodId), item.DefaultPaymentMethodId));
             node.Add(new XElement(nameof(item.DefaultShippingMethodId), item.DefaultShippingMethodId));
             node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
+            node.AddStoreId(item.StoreId);
 
             return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
         }

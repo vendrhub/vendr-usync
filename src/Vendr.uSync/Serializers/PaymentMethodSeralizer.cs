@@ -14,6 +14,7 @@ using uSync8.Core.Serialization;
 using Vendr.Core;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+using Vendr.uSync.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -30,7 +31,7 @@ namespace Vendr.uSync.Serializers
 
             node.Add(new XElement(nameof(item.Name), item.Name));
             node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
+            node.AddStoreId(item.StoreId);
 
             node.Add(SerializeCountryRegions(item.AllowedCountryRegions));
 
@@ -68,6 +69,9 @@ namespace Vendr.uSync.Serializers
             return root;
         }
 
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && node.GetStoreId() != Guid.Empty;
 
         protected override SyncAttempt<PaymentMethodReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -76,7 +80,7 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element(nameof(readonlyItem.Name)).ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readonlyItem.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
             var providerAlias = node.Element(nameof(readonlyItem.PaymentProviderAlias)).ValueOrDefault(string.Empty);
 
             using (var uow = _uowProvider.Create())

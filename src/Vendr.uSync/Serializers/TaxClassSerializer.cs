@@ -32,7 +32,7 @@ namespace Vendr.uSync.Serializers
 
             node.Add(new XElement(nameof(item.Name), item.Name));
             node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
+            node.AddStoreId(item.StoreId);
 
             node.Add(new XElement(nameof(item.DefaultTaxRate), item.DefaultTaxRate.Value));
 
@@ -56,6 +56,11 @@ namespace Vendr.uSync.Serializers
             return root;
         }
 
+
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && node.GetStoreId() != Guid.Empty;
+
         protected override SyncAttempt<TaxClassReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
             var readonlyItem = FindItem(node);
@@ -63,7 +68,7 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element(nameof(readonlyItem.Name)).ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readonlyItem.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
             var defaultTaxRate = node.Element(nameof(readonlyItem.DefaultTaxRate)).ValueOrDefault((decimal)0);
 
             using (var uow = _uowProvider.Create())

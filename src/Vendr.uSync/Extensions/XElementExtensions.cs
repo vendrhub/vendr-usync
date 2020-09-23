@@ -21,5 +21,17 @@ namespace Vendr.uSync.Extensions
             if (value == Guid.Empty) return null;
             return value;
         }
+
+        /// <summary>
+        ///  gets the store Id from the xml
+        /// </summary>
+        /// <remarks>
+        ///  We do this a lot, so this just makes the code for checking etc nicer.
+        /// </remarks>
+        public static Guid GetStoreId(this XElement node)
+            => node.Element("StoreId").ValueOrDefault(Guid.Empty);
+
+        public static void AddStoreId(this XElement node, Guid storeId)
+            => node.Add(new XElement("StoreId", storeId));
     }
 }

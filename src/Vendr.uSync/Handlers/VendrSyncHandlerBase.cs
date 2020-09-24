@@ -88,10 +88,10 @@ namespace Vendr.uSync.Handlers
 
 
         protected override TObject GetFromService(int id)
-            => default;
+            => default(TObject);
 
         protected override TObject GetFromService(string alias)
-            => default;
+            => default(TObject);
 
         protected override TObject GetFromService(TObject item)
             => item;
@@ -115,7 +115,6 @@ namespace Vendr.uSync.Handlers
         {
             if (uSync8BackOffice.eventsPaused) return;
             ExportDeletedItem(item, Path.Combine(rootFolder, DefaultFolder), DefaultConfig);
-
         }
 
     }

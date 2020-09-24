@@ -28,7 +28,12 @@
     <DictionaryItems></DictionaryItems>
     <Languages></Languages>
     <DataTypes></DataTypes>
-    <Actions></Actions>
+    <Actions>
+        <Action runat="install" undo="false" alias="VNDR.TransformConfig" 
+            file="~/Config/uSync8.config" 
+            xdtfile="~/App_Plugins/Vendr.uSync/config/uSync8.config">
+        </Action>
+    </Actions>
     <control></control>
 
     <files></files>

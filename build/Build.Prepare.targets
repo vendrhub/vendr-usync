@@ -10,7 +10,7 @@
             <BinFiles Include="$(SourceDir)\Vendr.*\bin\$(BuildConfiguration)\$(ProjectId).pdb" />
             <BinFiles Include="$(SourceDir)\Vendr.*\bin\$(BuildConfiguration)\$(ProjectId).xml" />
             <!-- BEGIN DLL DEPENDENCIES-->
-            <!--<BinFiles Include="$(SourceDir)\Vendr.*\bin\Your.Dependency.dll" />-->
+            <BinFiles Include="$(SourceDir)\Vendr.*\bin\$(BuildConfiguration)\Microsoft.Web.XmlTransform.dll" />
             <!-- END DLL DEPENDENCIES-->
             <ContentFiles Include="$(SourceDir)\$(ProjectId)\Web\UI\**\*" />
             <AssetFiles Include="$(RootDir)\assets\*" />

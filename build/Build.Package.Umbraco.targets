@@ -11,7 +11,7 @@
     <!-- PACKAGE -->
     <Target Name="PackageUmbracoFiles">
         <ItemGroup>
-            <ManifestFiles Include="$(ArtifactFilesDir)\bin\$(ProjectId).dll" />
+            <ManifestFiles Include="$(ArtifactFilesDir)\bin\*.dll" />
             <ManifestFiles Include="$(ArtifactFilesDir)\content\**\*">
                 <WorkingDirectory>$(ArtifactFilesDir)\content</WorkingDirectory>
             </ManifestFiles>

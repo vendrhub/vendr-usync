@@ -32,6 +32,7 @@
         <file src="$SrcDir$\bin\Vendr.uSync.pdb" target="lib\net472\Vendr.uSync.pdb" />
 
 		<file src="$SrcDir$\content\**\*.*" target="content" />
+		<file src="$SrcDir$\content\App_Plugins\Vendr.uSync\config\*.*" target="content\Config" />
         
     </files>
 </package>

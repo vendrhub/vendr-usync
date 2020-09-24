@@ -17,12 +17,10 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrStoreHandler", "Store", "vendr\\Stores",
-        VendrConstants.Priorites.Stores,
-        Icon = "icon-store")]
-    public class StoreHandler : VendrSyncHandlerBase<StoreReadOnly>, ISyncPostImportHandler, ISyncExtendedHandler
+    [SyncHandler("vendrStoreHandler", "Stores", "Vendr\\Stores", VendrConstants.Priorites.Stores,
+        Icon = "icon-store", IsTwoPass = true)]
+    public class StoreHandler : VendrSyncHandlerBase<StoreReadOnly>, ISyncExtendedHandler, ISyncPostImportHandler
     {
-
         // puts the handler into a 'vendr' group, so they can be synced seperatly from settings and content.
         public override string Group => VendrConstants.Group;
 

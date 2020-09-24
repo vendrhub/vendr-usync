@@ -4,7 +4,6 @@ using System.Xml.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Logging;
-using Umbraco.Core.Models.Identity;
 using Umbraco.Core.Services;
 
 using uSync8.Core;
@@ -18,11 +17,10 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Serializers
 {
-    [SyncSerializer("d4d2593e-04ad-4a32-9ca7-e2a5b2ff2725", "Store Serializer", VendrConstants.Serialization.Store)]
-    public class StoreSerializer : SyncSerializerRoot<StoreReadOnly>, ISyncSerializer<StoreReadOnly>
+    [SyncSerializer("d4d2593e-04ad-4a32-9ca7-e2a5b2ff2725", "Store Serializer", VendrConstants.Serialization.Store
+        ,IsTwoPass = true)]
+    public class StoreSerializer : VendrSerializerBase<StoreReadOnly>, ISyncSerializer<StoreReadOnly>
     {
-        private IVendrApi _vendrApi;
-        private IUnitOfWorkProvider _uowProvider;
         private IUserService _userService;
 
         public StoreSerializer(
@@ -30,13 +28,99 @@ namespace Vendr.uSync.Serializers
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
             ILogger logger)
-            : base(logger)
+            : base(vendrApi, uowProvider, logger)
         {
             _userService = userService;
-
-            _vendrApi = vendrApi;
-            _uowProvider = uowProvider;
         }
+
+        protected override SyncAttempt<XElement> SerializeCore(StoreReadOnly item, SyncSerializerOptions options)
+        {
+            // makes the basic xml,
+            var node = InitializeBaseNode(item, item.Alias);
+
+            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
+
+            node.Add(new XElement(nameof(item.PricesIncludeTax), item.PricesIncludeTax));
+            node.Add(new XElement(nameof(item.CookieTimeout), item.CookieTimeout));
+            node.Add(new XElement(nameof(item.CartNumberTemplate), item.CartNumberTemplate));
+
+            // product
+            node.Add(new XElement(nameof(item.ProductPropertyAliases), string.Join(",", item.ProductPropertyAliases)));
+            node.Add(new XElement(nameof(item.ProductUniquenessPropertyAliases), item.ProductUniquenessPropertyAliases));
+
+            // gift card
+            node.Add(new XElement(nameof(item.GiftCardCodeLength), item.GiftCardCodeLength));
+            node.Add(new XElement(nameof(item.GiftCardDaysValid), item.GiftCardDaysValid));
+            node.Add(new XElement(nameof(item.GiftCardCodeTemplate), item.GiftCardCodeTemplate));
+            node.Add(new XElement(nameof(item.GiftCardPropertyAliases), string.Join(",", item.GiftCardPropertyAliases)));
+            node.Add(new XElement(nameof(item.GiftCardActivationMethod), (int)item.GiftCardActivationMethod));
+
+            // order
+            node.Add(new XElement(nameof(item.OrderEditorConfig), item.OrderEditorConfig));
+            node.Add(new XElement(nameof(item.OrderNumberTemplate), item.OrderNumberTemplate));
+
+            node.Add(AddNullableGuid(nameof(item.BaseCurrencyId), item.BaseCurrencyId));
+            node.Add(AddNullableGuid(nameof(item.DefaultCountryId), item.DefaultCountryId));
+            node.Add(AddNullableGuid(nameof(item.DefaultTaxClassId), item.DefaultTaxClassId));
+            node.Add(AddNullableGuid(nameof(item.DefaultOrderStatusId), item.DefaultOrderStatusId));
+            node.Add(AddNullableGuid(nameof(item.ErrorOrderStatusId), item.ErrorOrderStatusId));
+            node.Add(AddNullableGuid(nameof(item.GiftCardActivationOrderStatusId), item.GiftCardActivationOrderStatusId));
+            node.Add(AddNullableGuid(nameof(item.DefaultGiftCardEmailTemplateId), item.DefaultGiftCardEmailTemplateId));
+            
+            node.Add(AddNullableGuid(nameof(item.ConfirmationEmailTemplateId), item.ConfirmationEmailTemplateId));
+            node.Add(AddNullableGuid(nameof(item.ErrorEmailTemplateId), item.ErrorEmailTemplateId));
+
+            node.Add(AddNullableGuid(nameof(item.ErrorOrderStatusId), item.ErrorOrderStatusId));
+            node.Add(AddNullableGuid(nameof(item.ShareStockFromStoreId), item.ShareStockFromStoreId));
+
+            SerializeAllowedUsers(node, item);
+
+            SerializeUserRoles(node, item);
+
+            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+        }
+
+        private void SerializeAllowedUsers(XElement node, StoreReadOnly item)
+        {
+            var allowedUsers = new XElement(nameof(item.AllowedUsers));
+
+            if (item.AllowedUsers.Count > 0)
+            {
+                foreach (var id in item.AllowedUsers)
+                {
+                    var user = _userService.GetByProviderKey(id.UserId);
+                    if (user != null)
+                    {
+                        allowedUsers.Add(new XElement("User", user.Username));
+                    }
+                }
+            }
+
+            node.Add(allowedUsers);
+        }
+
+        private void SerializeUserRoles(XElement node, StoreReadOnly item)
+        {
+            var allowedRoles = new XElement(nameof(item.AllowedUserRoles));
+            if (item.AllowedUserRoles.Count > 0)
+            {
+                foreach (var role in item.AllowedUserRoles)
+                {
+                    var group = _userService.GetUserGroupByAlias(role.Role);
+                    if (group != null)
+                    {
+                        allowedRoles.Add(new XElement("Role", group.Alias));
+                    }
+                }
+            }
+
+            node.Add(allowedRoles);
+        }
+
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && !string.IsNullOrWhiteSpace(node.Element("Name").ValueOrDefault(string.Empty));
 
         protected override SyncAttempt<StoreReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -51,7 +135,7 @@ namespace Vendr.uSync.Serializers
                 Store store;
                 if (readOnlyStore == null)
                 {
-                    store = Store.Create(uow, node.GetAlias(), name);
+                    store = Store.Create(uow, id, alias, name, false);
                 }
                 else
                 {
@@ -67,7 +151,7 @@ namespace Vendr.uSync.Serializers
                 store.SetPriceTaxInclusivity(node.Element(nameof(store.PricesIncludeTax)).ValueOrDefault(false));
 
                 store.SetCartNumberTemplate(node.Element(nameof(store.CartNumberTemplate)).ValueOrDefault(string.Empty));
-                
+
                 store.SetProductPropertyAliases(node.Element(nameof(store.ProductPropertyAliases)).ValueOrDefault(string.Empty)
                     .ToDelimitedList());
 
@@ -77,13 +161,59 @@ namespace Vendr.uSync.Serializers
                 store.SetGiftCardValidityTimeframe(node.Element(nameof(store.GiftCardDaysValid)).ValueOrDefault(store.GiftCardDaysValid));
                 store.SetGiftCardCodeTemplate(node.Element(nameof(store.GiftCardCodeTemplate)).ValueOrDefault(store.GiftCardCodeTemplate));
 
-                store.SetGiftCardPropertyAliases(node.Element(nameof(store.GiftCardPropertyAliases))
-                    .ValueOrDefault(string.Empty).ToDelimitedList());
+                store.SetGiftCardActivationMethod(node.Element(nameof(store.GiftCardActivationMethod)).ValueOrDefault(store.GiftCardActivationMethod));
+
+                var giftCardPropertyAliasList = node.Element(nameof(store.GiftCardPropertyAliases))
+                    .ValueOrDefault(string.Empty).ToDelimitedList();
+                if (giftCardPropertyAliasList != null && giftCardPropertyAliasList.Count > 0)
+                {
+                    store.SetGiftCardPropertyAliases(giftCardPropertyAliasList);
+                }
+                else
+                {
+                    store.ClearGiftCardPropertyAliases();
+                }
+
+                store.SetOrderEditorConfig(node.Element(nameof(store.OrderEditorConfig)).ValueOrDefault(store.OrderEditorConfig));
+
+                // base currency
+                Guid? currencyId = GetCurrencyId(node, nameof(store.BaseCurrencyId));
+                store.SetBaseCurrency(currencyId);
+
+                // country 
+                Guid? countryId = GetCountryId(node, nameof(store.DefaultCountryId));
+                store.SetDefaultCountry(countryId);
+
+                // tax class 
+                Guid? taxClassId = GetTaxClassId(node, nameof(store.DefaultTaxClassId));
+                store.SetDefaultTaxClass(taxClassId);
+
+                // DefaultOrderStatus 
+                Guid? defaultOrderStatusId = GetOrderStatusId(node, nameof(store.DefaultOrderStatusId));
+                store.SetDefaultOrderStatus(defaultOrderStatusId);
+
+                // error order status 
+                Guid? errorOrderStatusId = GetOrderStatusId(node, nameof(store.ErrorOrderStatusId));
+                store.SetErrorOrderStatus(errorOrderStatusId);
+
+                // gift card template
+                var defaultGiftCardEmailTemplateId = GetEmailTemplateId(node, nameof(store.DefaultGiftCardEmailTemplateId));
+                store.SetDefaultGiftCardEmailTemplate(defaultGiftCardEmailTemplateId);
+
+                // confimation email template
+                var confirmationEmailTemplateId = GetEmailTemplateId(node, nameof(store.ConfirmationEmailTemplateId));
+                store.SetConfirmationEmailTemplate(confirmationEmailTemplateId);
+
+                // error email template
+                var errorEmailTemplateId = GetEmailTemplateId(node, nameof(store.ErrorEmailTemplateId));
+                store.SetErrorEmailTemplate(errorEmailTemplateId);
+
+
 
                 DeserializeAllowedUsers(node, store);
 
                 DeserializeAllowedRoles(node, store);
-                 
+
                 _vendrApi.SaveStore(store);
 
                 uow.Complete();
@@ -114,7 +244,7 @@ namespace Vendr.uSync.Serializers
                 }
             }
 
-            store.SetAllowedUserRoles(roleIds, SetBehavior.Merge);
+            store.SetAllowedUserRoles(roleIds, SetBehavior.Replace);
         }
 
         private void DeserializeAllowedUsers(XElement node, Store store)
@@ -146,47 +276,17 @@ namespace Vendr.uSync.Serializers
         ///  called as part of the serialization, after all stores are serialized.
         /// </summary>
         /// <remarks>
-        ///  while it is possible (probibal on a new sync) that some of these values are not yet set, the handlers post processor will
-        ///  call import a second time at the end, so they will be when we finally get everything imported. 
-        /// </remarks>
+        ///  The second pass happens once all store items have gone through their first pass - as such you only need to put things
+        ///  here that rely on other stores being setup. 
+        ///  </remarks>
         public override SyncAttempt<StoreReadOnly> DeserializeSecondPass(StoreReadOnly item, XElement node, SyncSerializerOptions options)
         {
+            if (item == null) return SyncAttempt<StoreReadOnly>.Fail(node.GetAlias(), ChangeType.ImportFail, "Store Item not set for second pass");
+
             // currency 
             using (var uow = _uowProvider.Create())
             {
                 var store = item.AsWritable(uow);
-
-                // base currency
-                Guid? currencyId = GetCurrencyId(node, nameof(store.BaseCurrencyId));
-                store.SetBaseCurrency(currencyId);
-
-                // country 
-                Guid? countryId = GetCountryId(node, nameof(store.DefaultCountryId));
-                store.SetDefaultCountry(countryId);
-
-                // tax class 
-                Guid? taxClassId = GetTaxClassId(node, nameof(store.DefaultTaxClassId));
-                store.SetDefaultTaxClass(taxClassId);
-
-                // DefaultOrderStatus 
-                Guid? defaultOrderStatusId = GetOrderId(node, nameof(store.DefaultOrderStatusId));
-                store.SetDefaultOrderStatus(defaultOrderStatusId);
-
-                // error order status 
-                Guid? errorOrderStatusId = GetOrderId(node, nameof(store.ErrorOrderStatusId));
-                store.SetErrorOrderStatus(errorOrderStatusId);
-
-                // gift card template
-                var defaultGiftCardEmailTemplateId = GetEmailTemplateId(node, nameof(store.DefaultGiftCardEmailTemplateId));
-                store.SetDefaultGiftCardEmailTemplate(defaultGiftCardEmailTemplateId);
-
-                // confimation email template
-                var confirmationEmailTemplateId = GetEmailTemplateId(node, nameof(store.ConfirmationEmailTemplateId));
-                store.SetConfirmationEmailTemplate(confirmationEmailTemplateId);
-
-                // error email template
-                var errorEmailTemplateId = GetEmailTemplateId(node, nameof(store.ErrorEmailTemplateId));
-                store.SetErrorEmailTemplate(errorEmailTemplateId);
 
                 // StockSharingStore
                 var stockSharingStore = GetStoreId(node, nameof(store.ShareStockFromStoreId));
@@ -246,8 +346,8 @@ namespace Vendr.uSync.Serializers
         /// <summary>
         ///  Get the OrderId from the xml and confirm it exist in vendr.
         /// </summary>
-        private Guid? GetOrderId(XElement node, string name)
-            => GetVendrIdFromXml(node, name, _vendrApi.GetOrder);
+        private Guid? GetOrderStatusId(XElement node, string name)
+            => GetVendrIdFromXml(node, name, _vendrApi.GetOrderStatus);
 
         /// <summary>
         ///  Get the EmailTemplateId from the xml and confirm it exist in vendr.
@@ -260,88 +360,7 @@ namespace Vendr.uSync.Serializers
         /// </summary>
         private Guid? GetStoreId(XElement node, string name)
             => GetVendrIdFromXml(node, name, _vendrApi.GetStore);
-       
 
-        protected override SyncAttempt<XElement> SerializeCore(StoreReadOnly item, SyncSerializerOptions options)
-        {
-            // makes the basic xml,
-            var node = InitializeBaseNode(item, item.Alias);
-
-            node.Add(new XElement("Name", item.Name));
-            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-
-            node.Add(new XElement(nameof(item.PricesIncludeTax), item.PricesIncludeTax));
-            node.Add(new XElement(nameof(item.CookieTimeout), item.CookieTimeout));
-            node.Add(new XElement(nameof(item.CartNumberTemplate), item.CartNumberTemplate));
-
-            // product
-            node.Add(new XElement(nameof(item.ProductPropertyAliases), string.Join(",", item.ProductPropertyAliases)));
-            node.Add(new XElement(nameof(item.ProductUniquenessPropertyAliases), item.ProductUniquenessPropertyAliases));
-
-            // gift card
-            node.Add(new XElement(nameof(item.GiftCardCodeLength), item.GiftCardCodeLength));
-            node.Add(new XElement(nameof(item.GiftCardDaysValid), item.GiftCardDaysValid));
-            node.Add(new XElement(nameof(item.GiftCardCodeTemplate), item.GiftCardCodeTemplate));
-            node.Add(new XElement(nameof(item.GiftCardPropertyAliases), string.Join(",", item.GiftCardPropertyAliases)));
-            node.Add(new XElement(nameof(item.GiftCardActivationMethod), (int)item.GiftCardActivationMethod));
-
-            // order
-            node.Add(new XElement(nameof(item.OrderEditorConfig), item.OrderEditorConfig));
-            node.Add(new XElement(nameof(item.OrderNumberTemplate), item.OrderNumberTemplate));
-
-            node.Add(AddNullableGuid(nameof(item.BaseCurrencyId), item.BaseCurrencyId));
-            node.Add(AddNullableGuid(nameof(item.DefaultCountryId), item.DefaultCountryId));
-            node.Add(AddNullableGuid(nameof(item.DefaultOrderStatusId), item.DefaultOrderStatusId));
-            node.Add(AddNullableGuid(nameof(item.ErrorOrderStatusId), item.ErrorOrderStatusId));
-            node.Add(AddNullableGuid(nameof(item.GiftCardActivationOrderStatusId), item.GiftCardActivationOrderStatusId));
-            node.Add(AddNullableGuid(nameof(item.DefaultGiftCardEmailTemplateId), item.DefaultGiftCardEmailTemplateId));
-            node.Add(AddNullableGuid(nameof(item.ConfirmationEmailTemplateId), item.ConfirmationEmailTemplateId));
-            node.Add(AddNullableGuid(nameof(item.ErrorOrderStatusId), item.ErrorOrderStatusId));
-            node.Add(AddNullableGuid(nameof(item.ShareStockFromStoreId), item.ShareStockFromStoreId));
-
-            SerializeAllowedUsers(node, item);
-
-            SerializeUserRoles(node, item);
-
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
-        }
-
-        private void SerializeAllowedUsers(XElement node, StoreReadOnly item)
-        {
-            var allowedUsers = new XElement(nameof(item.AllowedUsers));
-
-            if (item.AllowedUsers.Count > 0)
-            {
-                foreach(var id in item.AllowedUsers)
-                {
-                    var user = _userService.GetByProviderKey(id.UserId);
-                    if (user != null)
-                    {
-                        allowedUsers.Add(new XElement("User", user.Username));
-                    }
-                }
-            }
-
-            node.Add(allowedUsers);
-        }
-
-        private void SerializeUserRoles(XElement node, StoreReadOnly item)
-        {
-            var allowedRoles = new XElement(nameof(item.AllowedUserRoles));
-            if (item.AllowedUserRoles.Count > 0)
-            {
-                foreach(var role in item.AllowedUserRoles)
-                {
-                    var group = _userService.GetUserGroupByAlias(role.Role);
-                    if (group != null)
-                    {
-                        allowedRoles.Add(new XElement("Role", group.Alias));
-                    }
-                }
-            }
-
-            node.Add(allowedRoles);
-        }
 
 
         private XElement AddNullableGuid(string alias, Guid? value)

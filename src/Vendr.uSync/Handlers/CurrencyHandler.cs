@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
@@ -17,10 +16,9 @@ using Vendr.Core.Models;
 
 namespace Vendr.uSync.Handlers
 {
-    [SyncHandler("vendrCurrencyHandler", "Currency", "vendr\\Currency",
-        VendrConstants.Priorites.Currency, Icon = "icon-coins-dollar-alt")]
-    public class CurrencyHandler : VendrSyncHandlerBase<CurrencyReadOnly>,
-        ISyncPostImportHandler, ISyncExtendedHandler
+    [SyncHandler("vendrCurrencyHandler", "Currencies", "Vendr\\Currency", VendrConstants.Priorites.Currency,
+        Icon = "icon-coins-dollar-alt")]
+    public class CurrencyHandler : VendrSyncHandlerBase<CurrencyReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;
 
@@ -38,23 +36,8 @@ namespace Vendr.uSync.Handlers
         protected override void DeleteViaService(CurrencyReadOnly item)
             => _vendrApi.DeleteCurrency(item.Id);
 
-        protected override IEnumerable<CurrencyReadOnly> GetChildItems(CurrencyReadOnly parent)
-        {
-            if (parent == null)
-            {
-                var currencies = new List<CurrencyReadOnly>();
-
-                var stores = _vendrApi.GetStores();
-                foreach (var store in stores)
-                {
-                    currencies.AddRange(_vendrApi.GetCurrencies(store.Id));
-                }
-
-                return currencies;
-            }
-
-            return Enumerable.Empty<CurrencyReadOnly>();
-        }
+        protected override IEnumerable<CurrencyReadOnly> GetByStore(Guid storeId)
+            => _vendrApi.GetCurrencies(storeId);
 
         protected override CurrencyReadOnly GetFromService(Guid key)
             => _vendrApi.GetCurrency(key);

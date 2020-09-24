@@ -13,11 +13,11 @@ using uSync8.Core.Serialization;
 using Vendr.Core;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+using Vendr.uSync.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
-    [SyncSerializer("79ED6CC2-B1B6-42DC-9B38-7C6ACCBAF895", "Currency Serializer",
-        VendrConstants.Serialization.Currency)]
+    [SyncSerializer("79ED6CC2-B1B6-42DC-9B38-7C6ACCBAF895", "Currency Serializer", VendrConstants.Serialization.Currency)]
     public class CurrencySerializer : SyncSerializerRoot<CurrencyReadOnly>,
         ISyncSerializer<CurrencyReadOnly>
     {
@@ -27,12 +27,33 @@ namespace Vendr.uSync.Serializers
         public CurrencySerializer(
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
-            ILogger logger            
+            ILogger logger
             ) : base(logger)
         {
             _vendrApi = vendrApi;
             _uowProvider = uowProvider;
         }
+
+        protected override SyncAttempt<XElement> SerializeCore(CurrencyReadOnly item, SyncSerializerOptions options)
+        {
+            var node = InitializeBaseNode(item, ItemAlias(item));
+
+            node.Add(new XElement("Name", item.Name));
+            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
+            node.AddStoreId(item.StoreId);
+
+            node.Add(new XElement(nameof(item.Code), item.Code));
+            node.Add(new XElement(nameof(item.CultureName), item.CultureName));
+            node.Add(new XElement(nameof(item.AllowedCountries), string.Join(",", item.AllowedCountries.Select(x => x.CountryId))));
+            node.Add(new XElement(nameof(item.FormatTemplate), item.FormatTemplate));
+
+            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+        }
+
+
+        public override bool IsValid(XElement node)
+            => base.IsValid(node)
+            && node.GetStoreId() != Guid.Empty;
 
         protected override SyncAttempt<CurrencyReadOnly> DeserializeCore(XElement node, SyncSerializerOptions options)
         {
@@ -41,11 +62,11 @@ namespace Vendr.uSync.Serializers
             var alias = node.GetAlias();
             var id = node.GetKey();
             var name = node.Element("Name").ValueOrDefault(alias);
-            var storeId = node.Element(nameof(readOnlyCurrency.StoreId)).ValueOrDefault(Guid.Empty);
+            var storeId = node.GetStoreId();
             var code = node.Element(nameof(readOnlyCurrency.Code)).ValueOrDefault(string.Empty);
             var culture = node.Element(nameof(readOnlyCurrency.CultureName)).ValueOrDefault(string.Empty);
 
-            using(var uow = _uowProvider.Create())
+            using (var uow = _uowProvider.Create())
             {
                 Currency currency;
                 if (readOnlyCurrency == null)
@@ -89,33 +110,20 @@ namespace Vendr.uSync.Serializers
                 .Select(x => x.CountryId);
 
 
-            foreach(var countryGuid in allowedCountries)
+            foreach (var countryGuid in allowedCountries)
             {
-                currency.AllowInCountry(countryGuid);
+                if (_vendrApi.GetCountry(countryGuid) != null)
+                {
+                    currency.AllowInCountry(countryGuid);
+                }
             }
 
-            foreach(var countryGuid in countriesToRemove)
+            foreach (var countryGuid in countriesToRemove)
             {
                 currency.DisallowInCountry(countryGuid);
             }
-          
-
-        }
 
 
-        protected override SyncAttempt<XElement> SerializeCore(CurrencyReadOnly item, SyncSerializerOptions options)
-        {
-            var node = InitializeBaseNode(item, ItemAlias(item));
-
-            node.Add(new XElement("Name", item.Name));
-            node.Add(new XElement(nameof(item.Code), item.Code));
-            node.Add(new XElement(nameof(item.CultureName), item.CultureName));
-            node.Add(new XElement(nameof(item.StoreId), item.StoreId));
-            node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
-            node.Add(new XElement(nameof(item.AllowedCountries), string.Join(",", item.AllowedCountries.Select(x => x.CountryId))));
-            node.Add(new XElement(nameof(item.FormatTemplate), item.FormatTemplate));
-
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         // overloads to let base functions do the bulk of the work.
@@ -134,7 +142,7 @@ namespace Vendr.uSync.Serializers
 
         protected override void SaveItem(CurrencyReadOnly item)
         {
-            using(var uow = _uowProvider.Create())
+            using (var uow = _uowProvider.Create())
             {
                 var entity = item.AsWritable(uow);
                 _vendrApi.SaveCurrency(entity);

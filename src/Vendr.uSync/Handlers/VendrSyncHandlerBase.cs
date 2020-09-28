@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 
 using Umbraco.Core;
 using Umbraco.Core.Cache;
@@ -13,6 +14,7 @@ using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
+using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
 
 using Vendr.Core.Api;
@@ -73,6 +75,25 @@ namespace Vendr.uSync.Handlers
             }
 
             return postActions;
+        }
+
+        /// <summary>
+        ///  if there is a 'OneWay' setting in the config, then we will only import something
+        ///  if it doesn't already exist. 
+        /// </summary>
+        /// <remarks>
+        ///  On the vendr base class means, it can be applied to any of the handler configs.
+        /// </remarks>
+        protected override bool ShouldImport(XElement node, HandlerSettings config)
+        {
+            if (config.Settings.ContainsKey("OneWay") && config.Settings["OneWay"].InvariantEquals("true"))
+            {
+                // only import if it doesn't already exist.
+                var item = GetFromService(node.GetKey());
+                return item == null;
+            }
+
+            return false;
         }
 
         /// <summary>

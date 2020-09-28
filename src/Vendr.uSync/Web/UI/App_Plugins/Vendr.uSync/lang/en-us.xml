@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="en" intName="English (US)" localName="English (US)" lcid="" culture="en-US">
+
+	<area alias="usync">
+		<key alias="import-vendr">Import Vendr settings</key>
+		<key alias="report-vendr">Report Vendr settings</key>
+	</area>
+
+</language>

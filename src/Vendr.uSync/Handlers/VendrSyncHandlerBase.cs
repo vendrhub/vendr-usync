@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -78,7 +79,7 @@ namespace Vendr.uSync.Handlers
         }
 
         /// <summary>
-        ///  if there is a 'OneWay' setting in the config, then we will only import something
+        ///  if there is a 'OneWay' (or CreateOnly) setting in the config, then we will only import something
         ///  if it doesn't already exist. 
         /// </summary>
         /// <remarks>
@@ -86,15 +87,17 @@ namespace Vendr.uSync.Handlers
         /// </remarks>
         protected override bool ShouldImport(XElement node, HandlerSettings config)
         {
-            if (config.Settings.ContainsKey("OneWay") && config.Settings["OneWay"].InvariantEquals("true"))
+            if (config.GetSetting("OneWay", false) || config.GetSetting("CreateOnly", false))
             {
                 // only import if it doesn't already exist.
                 var item = GetFromService(node.GetKey());
                 return item == null;
             }
 
-            return false;
+            return base.ShouldImport(node, config);
         }
+
+        
 
         /// <summary>
         ///  Handles the deleting of items in Umbraco but not the sync.

@@ -67,11 +67,14 @@ namespace Vendr.uSync.Handlers
 
             foreach (var action in actions)
             {
-                var result = Import(action.FileName, config, SerializerFlags.None);
-                if (result.Success)
+                var results = Import(action.FileName, config, SerializerFlags.None);
+                foreach (var result in results)
                 {
-                    var attempt = ImportSecondPass(action.FileName, result.Item, config, null);
-                    // postActions.Add();
+                    if (result.Success)
+                    {
+                        var attempt = ImportSecondPass(result, config, null);
+                        // postActions.Add();
+                    }
                 }
             }
 

@@ -98,9 +98,9 @@ namespace Vendr.uSync.Serializers
             }
         }
 
-        protected List<SyncTaxModel> GetTaxRates(XElement node)
+        protected List<SyncTaxRateModel> GetTaxRates(XElement node)
         {
-            var taxRates = new List<SyncTaxModel>();
+            var taxRates = new List<SyncTaxRateModel>();
 
             // load the regions from the xml.
             var root = node.Element("TaxRates");
@@ -108,11 +108,11 @@ namespace Vendr.uSync.Serializers
             {
                 foreach (var value in root.Elements("Rate"))
                 {
-                    taxRates.Add(new SyncTaxModel
+                    taxRates.Add(new SyncTaxRateModel
                     {
-                        CountryId = node.GetGuidValue("CountryId"),
-                        RegionId = node.GetGuidValue("RegionId"),
-                        Rate = node.Element("TaxRate").ValueOrDefault((decimal)0)
+                        CountryId = value.GetGuidValue("CountryId"),
+                        RegionId = value.GetGuidValue("RegionId"),
+                        Rate = value.Element("TaxRate").ValueOrDefault((decimal)0)
                     });
                 }
             }

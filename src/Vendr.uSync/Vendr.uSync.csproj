@@ -155,14 +155,15 @@
     <Reference Include="uSync8.Core, Version=8.8.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\uSync.Core.8.8.4\lib\net472\uSync8.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Vendr.Core, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vendr.Core.1.3.0\lib\net472\Vendr.Core.dll</HintPath>
+    <Reference Include="Vendr.Core, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Vendr.Core.1.6.0-alpha0088\lib\net472\Vendr.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\XElementExtensions.cs" />
     <Compile Include="Handlers\CountryHandler.cs" />
     <Compile Include="Handlers\CurrencyHandler.cs" />
+    <Compile Include="Handlers\PrintTemplateHandler.cs" />
     <Compile Include="Handlers\EmailTemplateHandler.cs" />
     <Compile Include="Handlers\OrderStatusHandler.cs" />
     <Compile Include="Handlers\PaymentMethodHandler.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serializers\CountrySerializer.cs" />
     <Compile Include="Serializers\CurrencySerializer.cs" />
+    <Compile Include="Serializers\PrintTemplateSerializer.cs" />
     <Compile Include="Serializers\EmailTemplateSerializer.cs" />
     <Compile Include="Serializers\MethodSerializerBase.cs" />
     <Compile Include="Serializers\OrderStatusSerializer.cs" />
@@ -183,7 +185,7 @@
     <Compile Include="Serializers\StoreSerializer.cs" />
     <Compile Include="Serializers\TaxClassSerializer.cs" />
     <Compile Include="Serializers\VendrSerializerBase.cs" />
-    <Compile Include="SyncModels\SyncTaxModel.cs" />
+    <Compile Include="SyncModels\SyncTaxRateModel.cs" />
     <Compile Include="SyncModels\SyncAllowedCountryRegionModel.cs" />
     <Compile Include="SyncModels\SyncServicePriceModel.cs" />
     <Compile Include="VendrConstants.cs" />

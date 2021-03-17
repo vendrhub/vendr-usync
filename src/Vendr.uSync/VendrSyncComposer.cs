@@ -22,6 +22,7 @@ namespace Vendr.uSync
             composition.Register<ISyncSerializer<CountryReadOnly>, CountrySerializer>();
 
             composition.Register<ISyncSerializer<EmailTemplateReadOnly>, EmailTemplateSerializer>();
+            composition.Register<ISyncSerializer<PrintTemplateReadOnly>, PrintTemplateSerializer>();
             composition.Register<ISyncSerializer<OrderStatusReadOnly>, OrderStatusSerializer>();
             composition.Register<ISyncSerializer<PaymentMethodReadOnly>, PaymentMethodSeralizer>();
 

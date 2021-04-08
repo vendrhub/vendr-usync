@@ -156,7 +156,7 @@
       <HintPath>..\..\packages\uSync.Core.8.8.4\lib\net472\uSync8.Core.dll</HintPath>
     </Reference>
     <Reference Include="Vendr.Core, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vendr.Core.1.6.0-alpha0088\lib\net472\Vendr.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vendr.Core.1.6.0\lib\net472\Vendr.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

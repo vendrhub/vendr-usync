@@ -15,6 +15,7 @@
 
             public const string EmailTemplate = "EmailTemplate";
             public const string PrintTemplate = "PrintTemplate";
+            public const string ExportTemplate = "ExportTemplate";
             public const string OrderStatus = "OrderStatus";
 
             public const string PaymentMethod = "PaymentMethod";
@@ -43,6 +44,7 @@
             public const int EmailTemplate = VENDR_RESERVED_LOWER + 2; // requires only store
             public const int OrderStatus = VENDR_RESERVED_LOWER + 3; // requires only store
             public const int PrintTemplate = VENDR_RESERVED_LOWER + 4; // requires only store
+            public const int ExportTemplate = VENDR_RESERVED_LOWER + 5; // requires only store
 
             public const int Country = VENDR_RESERVED_LOWER + 10; // requires store, currency, payment and shipping **
             public const int Region = VENDR_RESERVED_LOWER + 11; // requires store, country, paymeent and shipping **

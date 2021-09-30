@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrRegionHandler", "Regions", "Vendr\\Region", VendrConstants.Priorites.Region,
-        Icon = "icon-flag-alt", IsTwoPass = true)]
+        Icon = "icon-flag-alt", IsTwoPass = true, EntityType = VendrConstants.UdiEntityType.Region)]
     public class RegionHandler : VendrSyncHandlerBase<RegionReadOnly>, ISyncExtendedHandler, ISyncPostImportHandler
     {
         public override string Group => VendrConstants.Group;

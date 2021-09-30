@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrPaymentMethodHandler", "Payment Methods", "Vendr\\PaymentMethod", VendrConstants.Priorites.PaymentMethod,
-        Icon = "icon-multiple-credit-cards")]
+        Icon = "icon-multiple-credit-cards", EntityType = VendrConstants.UdiEntityType.PaymentMethod)]
     public class PaymentMethodHandler : VendrSyncHandlerBase<PaymentMethodReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

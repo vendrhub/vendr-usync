@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrCurrencyHandler", "Currencies", "Vendr\\Currency", VendrConstants.Priorites.Currency,
-        Icon = "icon-coins-dollar-alt")]
+        Icon = "icon-coins-dollar-alt", EntityType = VendrConstants.UdiEntityType.Currency)]
     public class CurrencyHandler : VendrSyncHandlerBase<CurrencyReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

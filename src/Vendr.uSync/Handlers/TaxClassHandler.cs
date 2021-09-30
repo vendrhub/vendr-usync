@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrTaxClassHandler", "Taxes", "Vendr\\TaxClass", VendrConstants.Priorites.TaxClass,
-        Icon = "icon-library")]
+        Icon = "icon-library", EntityType = VendrConstants.UdiEntityType.TaxClass)]
     public class TaxClassHandler : VendrSyncHandlerBase<TaxClassReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

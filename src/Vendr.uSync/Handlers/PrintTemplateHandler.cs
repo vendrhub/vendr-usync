@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrPrintTemplateHandler", "Print Templates", "Vendr\\PrintTemplate", VendrConstants.Priorites.PrintTemplate,
-        Icon = "icon-print")]
+        Icon = "icon-print", EntityType = VendrConstants.UdiEntityType.PrintTemplate)]
     public class PrintTemplateHandler : VendrSyncHandlerBase<PrintTemplateReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

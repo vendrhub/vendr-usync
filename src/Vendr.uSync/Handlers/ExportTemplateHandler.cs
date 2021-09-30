@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrExportTemplateHandler", "Export Templates", "Vendr\\ExportTemplate", VendrConstants.Priorites.ExportTemplate,
-        Icon = "icon-sharing-iphone")]
+        Icon = "icon-sharing-iphone", EntityType = VendrConstants.UdiEntityType.ExportTemplate)]
     public class ExportTemplateHandler : VendrSyncHandlerBase<ExportTemplateReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

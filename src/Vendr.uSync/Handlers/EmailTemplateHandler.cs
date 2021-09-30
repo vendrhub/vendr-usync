@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrEmailTemplateHandler", "Email Templates", "Vendr\\EmailTemplate", VendrConstants.Priorites.EmailTemplate,
-        Icon = "icon-mailbox")]
+        Icon = "icon-mailbox", EntityType = VendrConstants.UdiEntityType.EmailTemplate)]
     public class EmailTemplateHandler : VendrSyncHandlerBase<EmailTemplateReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

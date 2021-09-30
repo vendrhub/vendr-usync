@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrOrderStatusHandler", "Order Statuses", "Vendr\\OrderStatus", VendrConstants.Priorites.OrderStatus,
-        Icon = "icon-file-cabinet")]
+        Icon = "icon-file-cabinet", EntityType = VendrConstants.UdiEntityType.OrderStatus)]
     public class OrderStatusHandler : VendrSyncHandlerBase<OrderStatusReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

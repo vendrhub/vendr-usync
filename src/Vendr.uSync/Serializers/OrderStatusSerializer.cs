@@ -16,7 +16,8 @@ using Vendr.uSync.Extensions;
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("FA15B3E1-8100-431E-BC95-4B74134A42DD", "OrderStatus Serializer", VendrConstants.Serialization.OrderStatus)]
-    public class OrderStatusSerializer : VendrSerializerBase<OrderStatusReadOnly>, ISyncSerializer<OrderStatusReadOnly>
+    public class OrderStatusSerializer : VendrSerializerBase<OrderStatusReadOnly>, ISyncSerializer<OrderStatusReadOnly>,
+        ISyncNodeSerializer<OrderStatusReadOnly>
     {
         public OrderStatusSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
             : base(vendrApi, uowProvider, logger)
@@ -66,7 +67,6 @@ namespace Vendr.uSync.Serializers
                 item.SetSortOrder(node.Element(nameof(item.SortOrder)).ValueOrDefault(item.SortOrder));
 
                 _vendrApi.SaveOrderStatus(item);
-
                 uow.Complete();
 
                 return SyncAttempt<OrderStatusReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);

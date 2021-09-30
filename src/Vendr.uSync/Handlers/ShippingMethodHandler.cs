@@ -17,7 +17,7 @@ using Vendr.Core.Models;
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrShippingMethodHandler", "Shipping Methods", "Vendr\\ShippingMethod", VendrConstants.Priorites.ShippingMethod,
-        Icon = "icon-truck")]
+        Icon = "icon-truck", EntityType = VendrConstants.UdiEntityType.ShippingMethod)]
     public class ShippingMethodHandler : VendrSyncHandlerBase<ShippingMethodReadOnly>, ISyncExtendedHandler
     {
         public override string Group => VendrConstants.Group;

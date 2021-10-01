@@ -1,30 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common.Events;
+using Vendr.Core.Events.Notification;
+
+#if NETFRAMEWORK
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 
-using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 using uSync8.Core.Serialization;
+#else
+using Microsoft.Extensions.Logging;
 
-using Vendr.Core.Api;
-using Vendr.Core.Events;
-using Vendr.Core.Models;
+using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Strings;
+
+using uSync.BackOffice.SyncHandlers;
+using uSync.BackOffice.Services;
+using uSync.BackOffice.Configuration;
+using uSync.Core;
+#endif
 
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrPrintTemplateHandler", "Print Templates", "Vendr\\PrintTemplate", VendrConstants.Priorites.PrintTemplate,
         Icon = "icon-print", EntityType = VendrConstants.UdiEntityType.PrintTemplate)]
-    public class PrintTemplateHandler : VendrSyncHandlerBase<PrintTemplateReadOnly>, ISyncExtendedHandler
+    public class PrintTemplateHandler : VendrSyncHandlerBase<PrintTemplateReadOnly>, ISyncVendrHandler
+        , IEventHandlerFor<PrintTemplateSavedNotification>
+        , IEventHandlerFor<PrintTemplateDeletedNotification>
     {
-        public override string Group => VendrConstants.Group;
 
+#if NETFRAMEWORK
         public PrintTemplateHandler(IVendrApi vendrApi, IProfilingLogger logger, AppCaches appCaches, ISyncSerializer<PrintTemplateReadOnly> serializer, ISyncItemFactory itemFactory, SyncFileService syncFileService) : base(vendrApi, logger, appCaches, serializer, itemFactory, syncFileService)
-        {
-        }
+        { }
+#else
+        public PrintTemplateHandler(IVendrApi vendrApi, ILogger<VendrSyncHandlerBase<PrintTemplateReadOnly>> logger, AppCaches appCaches, IShortStringHelper shortStringHelper, SyncFileService syncFileService, uSyncEventService mutexService, uSyncConfigService uSyncConfig, ISyncItemFactory itemFactory) : base(vendrApi, logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, itemFactory)
+        { }
+#endif
 
         protected override void DeleteViaService(PrintTemplateReadOnly item)
             => _vendrApi.DeletePrintTemplate(item.Id);
@@ -38,10 +55,17 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(PrintTemplateReadOnly item)
             => item.Name;
 
-        protected override void InitializeEvents(HandlerSettings settings)
+        public void Handle(IEvent evt)
         {
-            EventHub.NotificationEvents.OnPrintTemplateSaved((e) => VendrItemSaved(e.PrintTemplate));
-            EventHub.NotificationEvents.OnPrintTemplateDeleted((e) => VendrItemDeleted(e.PrintTemplate));
+            switch (evt)
+            {
+                case PrintTemplateSavedNotification savedNotification:
+                    VendrItemSaved(savedNotification.PrintTemplate);
+                    break;
+                case PrintTemplateDeletedNotification deletedNotification:
+                    VendrItemDeleted(deletedNotification.PrintTemplate);
+                    break;
+            }
         }
     }
 }

@@ -1,34 +1,47 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Vendr.Core.Api;
+using Vendr.Core.Events.Notification;
+using Vendr.Core.Models;
+using Vendr.Common.Events;
+
+#if NETFRAMEWORK
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 
-using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 using uSync8.Core.Serialization;
+#else
+using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Strings;
 
-using Vendr.Core.Api;
-using Vendr.Core.Events;
-using Vendr.Core.Models;
+using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers;
+using uSync.Core;
+#endif
 
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrStoreHandler", "Stores", "Vendr\\Stores", VendrConstants.Priorites.Stores,
         Icon = "icon-store", IsTwoPass = true, EntityType = VendrConstants.UdiEntityType.Store)]
-    public class StoreHandler : VendrSyncHandlerBase<StoreReadOnly>, ISyncExtendedHandler, ISyncPostImportHandler
+    public class StoreHandler : VendrSyncHandlerBase<StoreReadOnly>, ISyncVendrHandler, ISyncPostImportHandler
+        , IEventHandlerFor<StoreSavedNotification>
+        , IEventHandlerFor<StoreDeletedNotification>
     {
-        // puts the handler into a 'vendr' group, so they can be synced seperatly from settings and content.
-        public override string Group => VendrConstants.Group;
-
-        public StoreHandler(
-            IVendrApi vendrApi,
-            IProfilingLogger logger, AppCaches appCaches, ISyncSerializer<StoreReadOnly> serializer, ISyncItemFactory itemFactory, SyncFileService syncFileService)
-            : base(vendrApi, logger, appCaches, serializer, itemFactory, syncFileService)
-        { }
+#if NETFRAMEWORK
+        public StoreHandler(IVendrApi vendrApi, IProfilingLogger logger, AppCaches appCaches, ISyncSerializer<StoreReadOnly> serializer, ISyncItemFactory itemFactory, SyncFileService syncFileService)
+            : base(vendrApi, logger, appCaches, serializer, itemFactory, syncFileService) { }
+#else
+        public StoreHandler(IVendrApi vendrApi, ILogger<VendrSyncHandlerBase<StoreReadOnly>> logger, AppCaches appCaches, IShortStringHelper shortStringHelper, SyncFileService syncFileService, uSyncEventService mutexService, uSyncConfigService uSyncConfig, ISyncItemFactory itemFactory) 
+            : base(vendrApi, logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, itemFactory) { }
+#endif
 
         /// <summary>
         ///  Delete a store 
@@ -73,10 +86,18 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(StoreReadOnly item)
             => item.Name;
 
-        protected override void InitializeEvents(HandlerSettings settings)
+
+        public void Handle(IEvent evt)
         {
-            EventHub.NotificationEvents.OnStoreSaved((e) => VendrItemSaved(e.Store));
-            EventHub.NotificationEvents.OnStoreDeleted((e) => VendrItemDeleted(e.Store));
+            switch (evt)
+            {
+                case StoreSavedNotification savedNotification:
+                    VendrItemSaved(savedNotification.Store);
+                    break;
+                case StoreDeletedNotification deletedNotification:
+                    VendrItemDeleted(deletedNotification.Store);
+                    break;
+            }
         }
     }
 }

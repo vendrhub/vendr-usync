@@ -37,6 +37,7 @@ namespace Vendr.uSync.Handlers
         where TObject : EntityBase
     {
         protected IVendrApi _vendrApi;
+        public override string Group => VendrConstants.Group;
 
         public VendrSyncHandlerBase(
             IVendrApi vendrApi,
@@ -134,35 +135,54 @@ namespace Vendr.uSync.Handlers
                 => Enumerable.Empty<uSyncAction>();
 
 
+#if NETFRAMEWORK
+        // for netcore these methods call the serializer. 
         protected override TObject GetFromService(int id)
             => default(TObject);
 
         protected override TObject GetFromService(string alias)
             => default(TObject);
 
-        protected override TObject GetFromService(TObject item)
-            => item;
-
         protected override Guid GetItemKey(TObject item)
             => item.Id;
+        protected override string GetItemPath(TObject item, bool useGuid, bool isFlat)
+            => useGuid ? item.Id.ToString() : GetItemName(item).ToSafeFileName();
+
+        protected override void InitializeEvents(HandlerSettings settings) { }
+#endif
+        protected override TObject GetFromService(TObject item)
+            => item;
 
         protected override IEnumerable<TObject> GetFolders(TObject parent)
             => Enumerable.Empty<TObject>();
 
-        protected override string GetItemPath(TObject item, bool useGuid, bool isFlat)
-            => useGuid ? item.Id.ToString() : GetItemName(item).ToSafeFileName(shortStringHelper);
+
 
         protected virtual void VendrItemSaved(TObject item)
         {
-            if (uSync8BackOffice.eventsPaused) return;
+            if (!ShouldProcessEvent()) return;
+
             Export(item, Path.Combine(rootFolder, DefaultFolder), DefaultConfig);
         }
 
         protected virtual void VendrItemDeleted(TObject item)
         {
-            if (uSync8BackOffice.eventsPaused) return;
+            if (!ShouldProcessEvent()) return;
             ExportDeletedItem(item, Path.Combine(rootFolder, DefaultFolder), DefaultConfig);
         }
 
+        /// <summary>
+        ///  checks to see if we should process the vendr events/notifications
+        /// </summary>
+        private bool ShouldProcessEvent()
+        {
+#if NETFRAMEWORK
+            if (uSync8BackOffice.eventsPaused) return false;
+#else
+            if (_mutexService.IsPaused) return false;
+            if (!DefaultConfig.Enabled) return false;
+#endif
+            return true;
+        }
     }
 }

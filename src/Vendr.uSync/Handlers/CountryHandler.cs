@@ -1,18 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Vendr.Common.Events;
+using Vendr.Core.Api;
+using Vendr.Core.Events.Notification;
+using Vendr.Core.Models;
+
+#if NETFRAMEWORK
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
 
-using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
 using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 using uSync8.Core.Serialization;
+#else 
+using Microsoft.Extensions.Logging;
 
-using Vendr.Core.Api;
-using Vendr.Core.Events;
-using Vendr.Core.Models;
+using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Strings;
+
+using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers;
+using uSync.Core;
+#endif
 
 namespace Vendr.uSync.Handlers
 {
@@ -25,19 +37,15 @@ namespace Vendr.uSync.Handlers
     /// </remarks>
     [SyncHandler("vendrCountryHandler", "Countries", "Vendr\\Country", VendrConstants.Priorites.Country,
         Icon = "icon-globe", IsTwoPass = true, EntityType = VendrConstants.UdiEntityType.Country)]
-    public class CountryHandler : VendrSyncHandlerBase<CountryReadOnly>, ISyncPostImportHandler, ISyncExtendedHandler
+    public class CountryHandler : VendrSyncHandlerBase<CountryReadOnly>, ISyncPostImportHandler, ISyncVendrHandler
     {
-        public override string Group => VendrConstants.Group;
-
-        public CountryHandler(
-            IVendrApi vendrApi,
-            IProfilingLogger logger,
-            AppCaches appCaches,
-            ISyncSerializer<CountryReadOnly> serializer,
-            ISyncItemFactory itemFactory,
-            SyncFileService syncFileService)
-            : base(vendrApi, logger, appCaches, serializer, itemFactory, syncFileService)
+#if NETFRAMEWORK
+        public CountryHandler(IVendrApi vendrApi, IProfilingLogger logger, AppCaches appCaches, ISyncSerializer<CountryReadOnly> serializer, ISyncItemFactory itemFactory, SyncFileService syncFileService) : base(vendrApi, logger, appCaches, serializer, itemFactory, syncFileService)
         { }
+#else
+        public CountryHandler(IVendrApi vendrApi, ILogger<VendrSyncHandlerBase<CountryReadOnly>> logger, AppCaches appCaches, IShortStringHelper shortStringHelper, SyncFileService syncFileService, uSyncEventService mutexService, uSyncConfigService uSyncConfig, ISyncItemFactory itemFactory) : base(vendrApi, logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, itemFactory)
+        { }
+#endif
 
         protected override void DeleteViaService(CountryReadOnly item)
             => _vendrApi.DeleteCountry(item.Id);
@@ -51,10 +59,18 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(CountryReadOnly item)
             => item.Name;
 
-        protected override void InitializeEvents(HandlerSettings settings)
+        public void Handle(IEvent evt)
         {
-            EventHub.NotificationEvents.OnCountrySaved((e) => VendrItemSaved(e.Country));
-            EventHub.NotificationEvents.OnCountryDeleted((e) => VendrItemDeleted(e.Country));
+            switch (evt)
+            {
+                case CountrySavedNotification savedNotification:
+                    VendrItemSaved(savedNotification.Country);
+                    break;
+                case CountryDeletedNotification deletedNotification:
+                    VendrItemDeleted(deletedNotification.Country);
+                    break;
+            }
         }
+
     }
 }

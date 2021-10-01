@@ -2,33 +2,40 @@
 using System.Linq;
 using System.Xml.Linq;
 
-using Umbraco.Core;
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+using Umbraco.Extensions;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("79ED6CC2-B1B6-42DC-9B38-7C6ACCBAF895", "Currency Serializer", VendrConstants.Serialization.Currency)]
-    public class CurrencySerializer : SyncSerializerRoot<CurrencyReadOnly>,
+    public class CurrencySerializer : VendrSerializerBase<CurrencyReadOnly>,
         ISyncSerializer<CurrencyReadOnly>
     {
-        private IVendrApi _vendrApi;
-        private IUnitOfWorkProvider _uowProvider;
-
         public CurrencySerializer(
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
-            ILogger logger
-            ) : base(logger)
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<CurrencySerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         {
             _vendrApi = vendrApi;
             _uowProvider = uowProvider;
@@ -47,7 +54,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.AllowedCountries), string.Join(",", item.AllowedCountries.Select(x => x.CountryId))));
             node.Add(new XElement(nameof(item.FormatTemplate), item.FormatTemplate));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
 
@@ -94,16 +101,16 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<CurrencyReadOnly>.Succeed(name, currency.AsReadOnly(), ChangeType.Import, true);
+                return SyncAttemptSucceed(name, currency.AsReadOnly(), ChangeType.Import, true);
             }
         }
 
         private void DeserializeCountries(XElement node, Currency currency)
         {
             var allowedCountries = node.Element(nameof(currency.AllowedCountries))
-                                .ValueOrDefault(string.Empty)
-                                .ToDelimitedList()
-                                .Select(x => Guid.Parse(x));
+                .ValueOrDefault(string.Empty)
+                .ToDelimitedList()
+                .Select(x => Guid.Parse(x));
 
             var countriesToRemove = currency.AllowedCountries
                 .Where(x => !allowedCountries.Contains(x.CountryId))
@@ -128,19 +135,13 @@ namespace Vendr.uSync.Serializers
 
         // overloads to let base functions do the bulk of the work.
 
-        protected override CurrencyReadOnly FindItem(Guid key)
+        public override string GetItemAlias(CurrencyReadOnly item)
+            => item.Code;
+
+        public override CurrencyReadOnly DoFindItem(Guid key)
             => _vendrApi.GetCurrency(key);
 
-        protected override CurrencyReadOnly FindItem(string alias)
-            => null;
-
-        protected override string ItemAlias(CurrencyReadOnly item)
-            => item.Name.ToSafeAlias();
-
-        protected override Guid ItemKey(CurrencyReadOnly item)
-            => item.Id;
-
-        protected override void SaveItem(CurrencyReadOnly item)
+        public override void DoSaveItem(CurrencyReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {
@@ -150,7 +151,7 @@ namespace Vendr.uSync.Serializers
             }
         }
 
-        protected override void DeleteItem(CurrencyReadOnly item)
+        public override void DoDeleteItem(CurrencyReadOnly item)
             => _vendrApi.DeleteCurrency(item.Id);
 
     }

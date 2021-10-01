@@ -1,26 +1,40 @@
 ﻿using System;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("FA15B3E1-8100-431E-BC95-4B74134A42DD", "OrderStatus Serializer", VendrConstants.Serialization.OrderStatus)]
-    public class OrderStatusSerializer : VendrSerializerBase<OrderStatusReadOnly>, ISyncSerializer<OrderStatusReadOnly>,
-        ISyncNodeSerializer<OrderStatusReadOnly>
+    public class OrderStatusSerializer : VendrSerializerBase<OrderStatusReadOnly>, ISyncSerializer<OrderStatusReadOnly>
+#if NETFRAMEWORK
+        , ISyncNodeSerializer<OrderStatusReadOnly>
+#endif
     {
-        public OrderStatusSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        public OrderStatusSerializer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<OrderStatusSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(OrderStatusReadOnly item, SyncSerializerOptions options)
@@ -33,7 +47,7 @@ namespace Vendr.uSync.Serializers
 
             node.Add(new XElement(nameof(item.Color), item.Color));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         public override bool IsValid(XElement node)
@@ -69,20 +83,20 @@ namespace Vendr.uSync.Serializers
                 _vendrApi.SaveOrderStatus(item);
                 uow.Complete();
 
-                return SyncAttempt<OrderStatusReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
-        protected override void DeleteItem(OrderStatusReadOnly item)
-            => _vendrApi.DeleteOrderStatus(item.Id);
-
-        protected override OrderStatusReadOnly FindItem(Guid key)
-            => _vendrApi.GetOrderStatus(key);
-
-        protected override string ItemAlias(OrderStatusReadOnly item)
+        public override string GetItemAlias(OrderStatusReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(OrderStatusReadOnly item)
+        public override void DoDeleteItem(OrderStatusReadOnly item)
+            => _vendrApi.DeleteOrderStatus(item.Id);
+
+        public override OrderStatusReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetOrderStatus(key);
+
+        public override void DoSaveItem(OrderStatusReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

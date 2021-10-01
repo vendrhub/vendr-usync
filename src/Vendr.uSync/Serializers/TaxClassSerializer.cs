@@ -3,28 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
+using Vendr.uSync.Extensions;
+using Vendr.uSync.SyncModels;
 
+#if NETFRAMEWORK
+using Vendr.Core;
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
-using Vendr.uSync.SyncModels;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Umbraco.Extensions;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("22F98052-DD59-4A0C-AA13-52398B794ED5", "TaxClass Serializer", VendrConstants.Serialization.TaxClass)]
     public class TaxClassSerializer : VendrSerializerBase<TaxClassReadOnly>, ISyncSerializer<TaxClassReadOnly>
     {
-        public TaxClassSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
-        {
-        }
+        public TaxClassSerializer(IVendrApi vendrApi,
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<TaxClassSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
+        {  }
 
         protected override SyncAttempt<XElement> SerializeCore(TaxClassReadOnly item, SyncSerializerOptions options)
         {
@@ -38,7 +50,7 @@ namespace Vendr.uSync.Serializers
 
             node.Add(SerializeTaxRates(item));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         private XElement SerializeTaxRates(TaxClassReadOnly item)
@@ -94,7 +106,7 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<TaxClassReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
@@ -153,16 +165,16 @@ namespace Vendr.uSync.Serializers
             }
         }
 
-        protected override void DeleteItem(TaxClassReadOnly item)
-            => _vendrApi.DeleteTaxClass(item.Id);
-
-        protected override TaxClassReadOnly FindItem(Guid key)
-            => _vendrApi.GetTaxClass(key);
-
-        protected override string ItemAlias(TaxClassReadOnly item)
+        public override string GetItemAlias(TaxClassReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(TaxClassReadOnly item)
+        public override void DoDeleteItem(TaxClassReadOnly item)
+            => _vendrApi.DeleteTaxClass(item.Id);
+
+        public override TaxClassReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetTaxClass(key);
+
+        public override void DoSaveItem(TaxClassReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

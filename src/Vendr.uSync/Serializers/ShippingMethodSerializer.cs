@@ -2,25 +2,38 @@
 using System.Linq;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Umbraco.Extensions;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("1C91B874-6028-4E50-AE1A-4481E9A267BD", "Shipping Method Serializer", VendrConstants.Serialization.ShippingMethod)]
     public class ShippingMethodSerializer : MethodSerializerBase<ShippingMethodReadOnly>, ISyncSerializer<ShippingMethodReadOnly>
     {
-        public ShippingMethodSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        public ShippingMethodSerializer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<ShippingMethodSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(ShippingMethodReadOnly item, SyncSerializerOptions options)
@@ -40,7 +53,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.Sku), item.Sku));
             node.Add(new XElement(nameof(item.TaxClassId), item.TaxClassId));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         public override bool IsValid(XElement node)
@@ -83,7 +96,7 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<ShippingMethodReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
 
             }
         }
@@ -132,8 +145,8 @@ namespace Vendr.uSync.Serializers
             var pricesToRemove = item.Prices
                 .Where(x => item.Prices == null
                 || !prices.Any(y => y.CountryId == x.CountryId
-                                && y.RegionId == x.RegionId
-                                && y.CurrencyId == y.CurrencyId))
+                    && y.RegionId == x.RegionId
+                    && y.CurrencyId == y.CurrencyId))
                 .ToList();
 
             foreach (var price in prices)
@@ -172,17 +185,16 @@ namespace Vendr.uSync.Serializers
             }
         }
 
-
-        protected override void DeleteItem(ShippingMethodReadOnly item)
-            => _vendrApi.DeleteShippingMethod(item.Id);
-
-        protected override ShippingMethodReadOnly FindItem(Guid key)
-            => _vendrApi.GetShippingMethod(key);
-
-        protected override string ItemAlias(ShippingMethodReadOnly item)
+        public override string GetItemAlias(ShippingMethodReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(ShippingMethodReadOnly item)
+        public override void DoDeleteItem(ShippingMethodReadOnly item)
+            => _vendrApi.DeleteShippingMethod(item.Id);
+
+        public override ShippingMethodReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetShippingMethod(key);
+
+        public override void DoSaveItem(ShippingMethodReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

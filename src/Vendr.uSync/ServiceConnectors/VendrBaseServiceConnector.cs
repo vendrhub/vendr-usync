@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+#if NETFRAMEWORK
 using Umbraco.Core;
 using Umbraco.Core.Deploy;
+#else
+using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Deploy;
+#endif
+
 
 namespace Vendr.uSync.ServiceConnectors
 {

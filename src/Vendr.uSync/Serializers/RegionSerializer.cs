@@ -1,26 +1,38 @@
 ﻿using System;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("62503EA1-6B7E-4567-92E2-9B67E2408434", "Region Serializer", VendrConstants.Serialization.Region)]
     public class RegionSerializer : VendrSerializerBase<RegionReadOnly>, ISyncSerializer<RegionReadOnly>
     {
-        public RegionSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger) : base(vendrApi, uowProvider, logger)
-        {
-        }
+        public RegionSerializer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<RegionSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
+        { }
 
         protected override SyncAttempt<XElement> SerializeCore(RegionReadOnly item, SyncSerializerOptions options)
         {
@@ -36,7 +48,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.DefaultPaymentMethodId), item.DefaultPaymentMethodId));
             node.Add(new XElement(nameof(item.DefaultShippingMethodId), item.DefaultShippingMethodId));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         public override bool IsValid(XElement node)
@@ -93,20 +105,20 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<RegionReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
-        protected override void DeleteItem(RegionReadOnly item)
-            => _vendrApi.DeleteRegion(item.Id);
-
-        protected override RegionReadOnly FindItem(Guid key)
-            => _vendrApi.GetRegion(key);
-
-        protected override string ItemAlias(RegionReadOnly item)
+        public override string GetItemAlias(RegionReadOnly item)
             => item.Code;
 
-        protected override void SaveItem(RegionReadOnly item)
+        public override void DoDeleteItem(RegionReadOnly item)
+            => _vendrApi.DeleteRegion(item.Id);
+
+        public override RegionReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetRegion(key);
+
+        public override void DoSaveItem(RegionReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

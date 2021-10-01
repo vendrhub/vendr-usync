@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
-
-using uSync8.Core.Extensions;
-
-using Vendr.Core;
+using Vendr.Common;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+
 using Vendr.uSync.Extensions;
 using Vendr.uSync.SyncModels;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
+using uSync8.Core.Extensions;
+#else
+using Microsoft.Extensions.Logging;
+using uSync.Core;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
@@ -22,8 +27,13 @@ namespace Vendr.uSync.Serializers
     public abstract class MethodSerializerBase<TObject> : VendrSerializerBase<TObject>
         where TObject : EntityBase
     {
-        protected MethodSerializerBase(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        protected MethodSerializerBase(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<MethodSerializerBase<TObject>> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected XElement SerializePrices(IReadOnlyList<ServicePrice> prices)

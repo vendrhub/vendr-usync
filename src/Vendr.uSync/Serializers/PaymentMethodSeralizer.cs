@@ -1,28 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI.WebControls;
 using System.Xml.Linq;
+using System.Collections.Generic;
 
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
+
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
 using Umbraco.Core.Logging;
-
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("707A16D7-AAA8-4399-8CF4-BEC82B8F6C8E", "PaymentMethod Serializer", VendrConstants.Serialization.PaymentMethod)]
     public class PaymentMethodSeralizer : MethodSerializerBase<PaymentMethodReadOnly>, ISyncSerializer<PaymentMethodReadOnly>
     {
-        public PaymentMethodSeralizer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        public PaymentMethodSeralizer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<PaymentMethodSeralizer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(PaymentMethodReadOnly item, SyncSerializerOptions options)
@@ -49,7 +60,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.Sku), item.Sku));
             node.Add(new XElement(nameof(item.TaxClassId), item.TaxClassId));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         private XElement SerializeProviderSettings(IReadOnlyDictionary<string, string> values)
@@ -121,7 +132,7 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<PaymentMethodReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
@@ -230,16 +241,16 @@ namespace Vendr.uSync.Serializers
             }
         }
 
-        protected override void DeleteItem(PaymentMethodReadOnly item)
-            => _vendrApi.DeletePaymentMethod(item.Id);
-
-        protected override PaymentMethodReadOnly FindItem(Guid key)
-            => _vendrApi.GetPaymentMethod(key);
-
-        protected override string ItemAlias(PaymentMethodReadOnly item)
+        public override string GetItemAlias(PaymentMethodReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(PaymentMethodReadOnly item)
+        public override void DoDeleteItem(PaymentMethodReadOnly item)
+            => _vendrApi.DeletePaymentMethod(item.Id);
+
+        public override PaymentMethodReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetPaymentMethod(key);
+
+        public override void DoSaveItem(PaymentMethodReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

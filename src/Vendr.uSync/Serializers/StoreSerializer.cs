@@ -2,23 +2,30 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
+
+#if NETFRAMEWORK
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Services;
-
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Umbraco.Extensions;
+using Umbraco.Cms.Core.Services;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
-    [SyncSerializer("d4d2593e-04ad-4a32-9ca7-e2a5b2ff2725", "Store Serializer", VendrConstants.Serialization.Store
-        ,IsTwoPass = true)]
+    [SyncSerializer("d4d2593e-04ad-4a32-9ca7-e2a5b2ff2725", "Store Serializer", VendrConstants.Serialization.Store,IsTwoPass = true)]
     public class StoreSerializer : VendrSerializerBase<StoreReadOnly>, ISyncSerializer<StoreReadOnly>
     {
         private IUserService _userService;
@@ -27,8 +34,11 @@ namespace Vendr.uSync.Serializers
             IUserService userService,
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
-            ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<StoreSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         {
             _userService = userService;
         }
@@ -78,7 +88,7 @@ namespace Vendr.uSync.Serializers
 
             SerializeUserRoles(node, item);
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         private void SerializeAllowedUsers(XElement node, StoreReadOnly item)
@@ -208,8 +218,6 @@ namespace Vendr.uSync.Serializers
                 var errorEmailTemplateId = GetEmailTemplateId(node, nameof(store.ErrorEmailTemplateId));
                 store.SetErrorEmailTemplate(errorEmailTemplateId);
 
-
-
                 DeserializeAllowedUsers(node, store);
 
                 DeserializeAllowedRoles(node, store);
@@ -218,7 +226,7 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<StoreReadOnly>.Succeed(name, store.AsReadOnly(), ChangeType.Import, true);
+                return SyncAttemptSucceed(name, store.AsReadOnly(), ChangeType.Import, true);
             }
         }
 
@@ -302,7 +310,7 @@ namespace Vendr.uSync.Serializers
                 _vendrApi.SaveStore(store);
                 uow.Complete();
 
-                return SyncAttempt<StoreReadOnly>.Succeed(store.Name, store.AsReadOnly(), ChangeType.Import, true);
+                return SyncAttemptSucceed(store.Name, store.AsReadOnly(), ChangeType.Import, true);
             }
 
         }
@@ -369,19 +377,16 @@ namespace Vendr.uSync.Serializers
 
         // overloads to let base functions do the bulk of the work.
 
-        protected override Guid ItemKey(StoreReadOnly item)
-            => item.Id;
-
-        protected override string ItemAlias(StoreReadOnly item)
+        public override string GetItemAlias(StoreReadOnly item)
             => item.Alias;
 
-        protected override StoreReadOnly FindItem(Guid key)
+        public override StoreReadOnly DoFindItem(Guid key)
             => _vendrApi.GetStore(key);
 
-        protected override StoreReadOnly FindItem(string alias)
+        public override StoreReadOnly DoFindItem(string alias)
             => _vendrApi.GetStore(alias);
 
-        protected override void SaveItem(StoreReadOnly item)
+        public override void DoSaveItem(StoreReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {
@@ -391,7 +396,7 @@ namespace Vendr.uSync.Serializers
             }
         }
 
-        protected override void DeleteItem(StoreReadOnly item)
+        public override void DoDeleteItem(StoreReadOnly item)
             => _vendrApi.DeleteStore(item.Id);
     }
 }

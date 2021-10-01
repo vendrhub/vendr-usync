@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Umbraco.Core;
-
-using uSync8.Core.Sync;
-
 using Vendr.Core.Api;
 using Vendr.Core.Models;
 
-using static Vendr.Web.Constants.Trees.Settings;
+using static Vendr.Umbraco.Constants.Trees.Settings;
+
+#if NETFRAMEWORK
+using uSync8.Core.Sync;
+using Umbraco.Core;
+#else
+using uSync.Core.Sync;
+using Umbraco.Cms.Core;
+using Umbraco.Extensions;
+#endif
+
 
 namespace Vendr.uSync.SyncManagers
 {
@@ -33,7 +36,7 @@ namespace Vendr.uSync.SyncManagers
 
         public string[] EntityTypes => _nodeToEntityMapping.Values.ToArray();
 
-        public string[] Trees => new string[] { Vendr.Web.Constants.Trees.Settings.Alias };
+        public string[] Trees => new string[] { Alias };
 
         private readonly IVendrApi _vendrApi;
 
@@ -184,7 +187,7 @@ namespace Vendr.uSync.SyncManagers
             var attempt = item.Id.TryConvertTo<int>();
             if (!attempt.Success) return string.Empty;
 
-            var vendrNodeType = Vendr.Web.Constants.Trees.Settings.Ids.FirstOrDefault(x => x.Value == attempt.Result).Key;
+            var vendrNodeType = Ids.FirstOrDefault(x => x.Value == attempt.Result).Key;
 
             if (_nodeToEntityMapping.ContainsKey(vendrNodeType))
                 return _nodeToEntityMapping[vendrNodeType];

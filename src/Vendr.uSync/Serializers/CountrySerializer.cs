@@ -1,19 +1,25 @@
 ﻿using System;
 using System.Xml.Linq;
 
-using Umbraco.Core;
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
-
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+using Umbraco.Extensions;
+#endif
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("A5C0B948-BA5F-45FF-B6E6-EBA0BB3C6139", "Country Serializer", VendrConstants.Serialization.Country)]
@@ -23,9 +29,12 @@ namespace Vendr.uSync.Serializers
         public CountrySerializer(
             IVendrApi vendrApi,
             IUnitOfWorkProvider uowProvider,
-            ILogger logger
-            ) : base(vendrApi, uowProvider, logger)
-        {}
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<CountrySerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif        
+        { }
 
         /// <summary>
         ///  Confirm that the xml contains the minimum set of things we need to perform the sync.
@@ -81,7 +90,7 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<CountryReadOnly>.Succeed(name, country.AsReadOnly(), ChangeType.Import, true);
+                return SyncAttemptSucceed(name, country.AsReadOnly(), ChangeType.Import, true);
             }
         }
 
@@ -98,18 +107,18 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.SortOrder), item.SortOrder));
             node.AddStoreId(item.StoreId);
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         // overloads to let base functions do the bulk of the work.
 
-        protected override CountryReadOnly FindItem(Guid key)
+        public override string GetItemAlias(CountryReadOnly item)
+            => item.Code;
+
+        public override CountryReadOnly DoFindItem(Guid key)
            => _vendrApi.GetCountry(key);
 
-        protected override string ItemAlias(CountryReadOnly item)
-            => item.Name.ToSafeAlias();
-
-        protected override void SaveItem(CountryReadOnly item)
+        public override void DoSaveItem(CountryReadOnly item)
         {
             {
                 using (var uow = _uowProvider.Create())
@@ -120,7 +129,7 @@ namespace Vendr.uSync.Serializers
                 }
             }
         }
-        protected override void DeleteItem(CountryReadOnly item)
+        public override void DoDeleteItem(CountryReadOnly item)
             => _vendrApi.DeleteCountry(item.Id);
 
     }

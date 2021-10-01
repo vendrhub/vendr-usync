@@ -1,8 +1,11 @@
-﻿
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
+#if NETFRAMEWORK
 using uSync8.BackOffice.Models;
+#else
+using uSync.BackOffice.Models;
+#endif
 
 namespace Vendr.uSync
 {
@@ -17,7 +20,7 @@ namespace Vendr.uSync
     {
         public string Name => "Vendr.uSync";
 
-        public string Version => "1.0.0";
+        public string Version => "2.0.0";
 
         public string Icon => "icon-store";
 

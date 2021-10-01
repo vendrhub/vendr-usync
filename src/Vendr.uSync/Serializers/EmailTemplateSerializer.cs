@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
@@ -19,8 +26,13 @@ namespace Vendr.uSync.Serializers
 
     public class EmailTemplateSerializer : VendrSerializerBase<EmailTemplateReadOnly>, ISyncSerializer<EmailTemplateReadOnly>
     {
-        public EmailTemplateSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        public EmailTemplateSerializer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<EmailTemplateSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(EmailTemplateReadOnly item, SyncSerializerOptions options)
@@ -44,7 +56,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.Subject), item.Subject));
             node.Add(new XElement(nameof(item.TemplateView), item.TemplateView));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         public override bool IsValid(XElement node)
@@ -90,25 +102,22 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<EmailTemplateReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
         // 
 
-        protected override void DeleteItem(EmailTemplateReadOnly item)
-            => _vendrApi.DeleteEmailTemplate(item.Id);
-
-        protected override EmailTemplateReadOnly FindItem(Guid key)
-            => _vendrApi.GetEmailTemplate(key);
-
-        protected override EmailTemplateReadOnly FindItem(string alias)
-            => null;
-
-        protected override string ItemAlias(EmailTemplateReadOnly item)
+        public override string GetItemAlias(EmailTemplateReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(EmailTemplateReadOnly item)
+        public override void DoDeleteItem(EmailTemplateReadOnly item)
+            => _vendrApi.DeleteEmailTemplate(item.Id);
+
+        public override EmailTemplateReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetEmailTemplate(key);
+
+        public override void DoSaveItem(EmailTemplateReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

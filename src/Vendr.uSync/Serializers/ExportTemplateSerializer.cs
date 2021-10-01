@@ -1,25 +1,37 @@
 ﻿using System;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("6D4C64D0-B840-47F7-AF92-61A1C86D892E", "Export Template Serializer", VendrConstants.Serialization.ExportTemplate)]
     public class ExportTemplateSerializer : VendrSerializerBase<ExportTemplateReadOnly>, ISyncSerializer<ExportTemplateReadOnly>
     {
-        public ExportTemplateSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        public ExportTemplateSerializer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<ExportTemplateSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(ExportTemplateReadOnly item, SyncSerializerOptions options)
@@ -36,7 +48,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.ExportStrategy), item.ExportStrategy));
             node.Add(new XElement(nameof(item.TemplateView), item.TemplateView));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         public override bool IsValid(XElement node)
@@ -76,25 +88,22 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<ExportTemplateReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
         // 
 
-        protected override void DeleteItem(ExportTemplateReadOnly item)
-            => _vendrApi.DeleteExportTemplate(item.Id);
-
-        protected override ExportTemplateReadOnly FindItem(Guid key)
-            => _vendrApi.GetExportTemplate(key);
-
-        protected override ExportTemplateReadOnly FindItem(string alias)
-            => null;
-
-        protected override string ItemAlias(ExportTemplateReadOnly item)
+        public override string GetItemAlias(ExportTemplateReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(ExportTemplateReadOnly item)
+        public override void DoDeleteItem(ExportTemplateReadOnly item)
+            => _vendrApi.DeleteExportTemplate(item.Id);
+
+        public override ExportTemplateReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetExportTemplate(key);
+
+        public override void DoSaveItem(ExportTemplateReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

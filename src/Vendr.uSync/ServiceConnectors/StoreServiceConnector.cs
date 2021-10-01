@@ -1,5 +1,8 @@
-﻿
+﻿#if NETFRAMEWORK
 using Umbraco.Core;
+#else
+using Umbraco.Cms.Core;
+#endif
 
 namespace Vendr.uSync.ServiceConnectors
 {

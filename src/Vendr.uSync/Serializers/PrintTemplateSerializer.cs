@@ -1,25 +1,37 @@
 ﻿using System;
 using System.Xml.Linq;
 
-using Umbraco.Core.Logging;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
+using Vendr.Common;
 
+using Vendr.uSync.Extensions;
+
+#if NETFRAMEWORK
+using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Models;
 using uSync8.Core.Serialization;
-
-using Vendr.Core;
-using Vendr.Core.Api;
-using Vendr.Core.Models;
-using Vendr.uSync.Extensions;
+#else
+using uSync.Core;
+using uSync.Core.Models;
+using uSync.Core.Serialization;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("D0D7176C-2EDD-453E-9795-D71F1D29B44A", "Print Template Serializer", VendrConstants.Serialization.PrintTemplate)]
     public class PrintTemplateSerializer : VendrSerializerBase<PrintTemplateReadOnly>, ISyncSerializer<PrintTemplateReadOnly>
     {
-        public PrintTemplateSerializer(IVendrApi vendrApi, IUnitOfWorkProvider uowProvider, ILogger logger)
-            : base(vendrApi, uowProvider, logger)
+        public PrintTemplateSerializer(IVendrApi vendrApi, 
+            IUnitOfWorkProvider uowProvider,
+#if NETFRAMEWORK
+            ILogger logger) : base(vendrApi, uowProvider, logger)
+#else
+            ILogger<PrintTemplateSerializer> logger) : base(vendrApi, uowProvider, logger)
+#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(PrintTemplateReadOnly item, SyncSerializerOptions options)
@@ -33,7 +45,7 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.Category), item.Category));
             node.Add(new XElement(nameof(item.TemplateView), item.TemplateView));
 
-            return SyncAttempt<XElement>.SucceedIf(node != null, item.Name, node, ChangeType.Export);
+            return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
         public override bool IsValid(XElement node)
@@ -70,25 +82,25 @@ namespace Vendr.uSync.Serializers
 
                 uow.Complete();
 
-                return SyncAttempt<PrintTemplateReadOnly>.Succeed(name, item.AsReadOnly(), ChangeType.Import);
+                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
             }
         }
 
         // 
 
-        protected override void DeleteItem(PrintTemplateReadOnly item)
-            => _vendrApi.DeletePrintTemplate(item.Id);
-
-        protected override PrintTemplateReadOnly FindItem(Guid key)
-            => _vendrApi.GetPrintTemplate(key);
-
-        protected override PrintTemplateReadOnly FindItem(string alias)
-            => null;
-
-        protected override string ItemAlias(PrintTemplateReadOnly item)
+        public override string GetItemAlias(PrintTemplateReadOnly item)
             => item.Alias;
 
-        protected override void SaveItem(PrintTemplateReadOnly item)
+        public override void DoDeleteItem(PrintTemplateReadOnly item)
+            => _vendrApi.DeletePrintTemplate(item.Id);
+
+        public override PrintTemplateReadOnly DoFindItem(Guid key)
+            => _vendrApi.GetPrintTemplate(key);
+
+        public override PrintTemplateReadOnly DoFindItem(string alias)
+            => null;
+
+        public override void DoSaveItem(PrintTemplateReadOnly item)
         {
             using (var uow = _uowProvider.Create())
             {

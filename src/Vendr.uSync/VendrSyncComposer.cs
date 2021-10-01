@@ -1,18 +1,13 @@
-﻿using Umbraco.Core;
+﻿#if NETFRAMEWORK
+
+using Umbraco.Core;
 using Vendr.Core.Models;
 using Vendr.uSync.Serializers;
 
-#if NETFRAMEWORK
 using Umbraco.Core.Composing;
 using uSync8.BackOffice;
 using uSync8.Core;
 using uSync8.Core.Serialization;
-#else
-using Umbraco.Core.Composing;
-using Umbraco.Cms.Core.Composing;
-using uSync.Core.Serialization;
-using uSync.BackOffice;
-#endif
 
 namespace Vendr.uSync
 {
@@ -38,3 +33,5 @@ namespace Vendr.uSync
         }
     }
 }
+
+#endif

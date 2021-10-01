@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Umbraco.Core;
-using Umbraco.Core.Models;
-
-using uSync8.Core.Dependency;
-
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+
+#if NETFRAMEWORK
+using Umbraco.Core;
+using Umbraco.Core.Models;
+using uSync8.Core.Dependency;
+#else
+using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Models;
+using uSync.Core.Dependency;
+#endif
 
 namespace Vendr.uSync.Dependencies
 {

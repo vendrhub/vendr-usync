@@ -1,4 +1,5 @@
-﻿using Microsoft.Web.XmlTransform;
+﻿#if NETFRAMEWORK
+using Microsoft.Web.XmlTransform;
 using System.Xml.Linq;
 using Umbraco.Core.IO;
 using Umbraco.Core.PackageActions;
@@ -61,3 +62,4 @@ namespace Vendr.uSync.Web.PackageActions
         }
     }
 }
+#endif

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +16,8 @@ using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 using uSync8.Core.Serialization;
 #else
+using Microsoft.Extensions.Logging;
+
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Strings;
 

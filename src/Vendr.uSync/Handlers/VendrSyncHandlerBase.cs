@@ -1,15 +1,15 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Vendr.Core.Api;
+using Vendr.Core.Models;
 
+#if NETFRAMEWORK
 using Umbraco.Core;
 using Umbraco.Core.Cache;
 using Umbraco.Core.Logging;
-
 using uSync8.BackOffice;
 using uSync8.BackOffice.Configuration;
 using uSync8.BackOffice.Services;
@@ -17,9 +17,18 @@ using uSync8.BackOffice.SyncHandlers;
 using uSync8.Core;
 using uSync8.Core.Extensions;
 using uSync8.Core.Serialization;
-
-using Vendr.Core.Api;
-using Vendr.Core.Models;
+#else
+using Umbraco.Cms.Core.Cache;
+using Umbraco.Cms.Core.Strings;
+using Umbraco.Extensions;
+using uSync.Core;
+using uSync.Core.Serialization;
+using uSync.BackOffice;
+using uSync.BackOffice.Configuration;
+using uSync.BackOffice.Services;
+using uSync.BackOffice.SyncHandlers;
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Vendr.uSync.Handlers
 {
@@ -31,12 +40,23 @@ namespace Vendr.uSync.Handlers
 
         public VendrSyncHandlerBase(
             IVendrApi vendrApi,
+#if NETFRAMEWORK
             IProfilingLogger logger,
             AppCaches appCaches,
             ISyncSerializer<TObject> serializer,
             ISyncItemFactory itemFactory,
             SyncFileService syncFileService)
             : base(logger, appCaches, serializer, itemFactory, syncFileService)
+#else
+            ILogger<VendrSyncHandlerBase<TObject>> logger, 
+            AppCaches appCaches, 
+            IShortStringHelper shortStringHelper, 
+            SyncFileService syncFileService, 
+            uSyncEventService mutexService, 
+            uSyncConfigService uSyncConfig, 
+            ISyncItemFactory itemFactory)
+            : base(logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, itemFactory)
+#endif
         {
             _vendrApi = vendrApi;
         }
@@ -130,7 +150,7 @@ namespace Vendr.uSync.Handlers
             => Enumerable.Empty<TObject>();
 
         protected override string GetItemPath(TObject item, bool useGuid, bool isFlat)
-            => useGuid ? item.Id.ToString() : GetItemName(item).ToSafeFileName();
+            => useGuid ? item.Id.ToString() : GetItemName(item).ToSafeFileName(shortStringHelper);
 
         protected virtual void VendrItemSaved(TObject item)
         {

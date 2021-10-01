@@ -9,6 +9,7 @@ using Vendr.Common;
 using Vendr.uSync.Extensions;
 
 #if NETFRAMEWORK
+using Umbraco.Core;
 using Umbraco.Core.Logging;
 using uSync8.Core;
 using uSync8.Core.Extensions;

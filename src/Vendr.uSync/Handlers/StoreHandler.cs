@@ -68,6 +68,7 @@ namespace Vendr.uSync.Handlers
             {
                 return _vendrApi.GetStores();
             }
+
             return Enumerable.Empty<StoreReadOnly>();
         }
 

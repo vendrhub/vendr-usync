@@ -26,8 +26,6 @@ using uSync.BackOffice.SyncHandlers;
 using uSync.Core;
 #endif
 
-
-
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrExportTemplateHandler", "Export Templates", "Vendr\\ExportTemplate", VendrConstants.Priorites.ExportTemplate,
@@ -41,7 +39,6 @@ namespace Vendr.uSync.Handlers
         public ExportTemplateHandler(IVendrApi vendrApi, ILogger<VendrSyncHandlerBase<ExportTemplateReadOnly>> logger, AppCaches appCaches, IShortStringHelper shortStringHelper, SyncFileService syncFileService, uSyncEventService mutexService, uSyncConfigService uSyncConfig, ISyncItemFactory itemFactory) : base(vendrApi, logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, itemFactory)
         { }
 #endif
-
 
         protected override void DeleteViaService(ExportTemplateReadOnly item)
             => _vendrApi.DeleteExportTemplate(item.Id);
@@ -67,6 +64,5 @@ namespace Vendr.uSync.Handlers
                     break;
             }
         }
-
     }
 }

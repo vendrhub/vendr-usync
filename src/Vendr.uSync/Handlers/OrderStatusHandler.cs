@@ -40,7 +40,6 @@ namespace Vendr.uSync.Handlers
         { }
 #endif
 
-
         protected override void DeleteViaService(OrderStatusReadOnly item)
             => _vendrApi.DeleteOrderStatus(item.Id);
 

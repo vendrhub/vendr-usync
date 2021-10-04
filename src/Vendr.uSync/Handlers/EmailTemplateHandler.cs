@@ -26,8 +26,6 @@ using uSync.BackOffice.SyncHandlers;
 using uSync.Core;
 #endif
 
-
-
 namespace Vendr.uSync.Handlers
 {
     [SyncHandler("vendrEmailTemplateHandler", "Email Templates", "Vendr\\EmailTemplate", VendrConstants.Priorites.EmailTemplate,

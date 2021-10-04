@@ -9,6 +9,7 @@
 				<Handler Alias="vendrCountryHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrEmailTemplateHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
                 <Handler Alias="vendrPrintTemplateHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
+                <Handler Alias="vendrExportTemplateHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrOrderStatusHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrPaymentMethodHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrRegionHandler" Enabled="true" xdt:Transform="Remove" xdt:Locator="Match(Alias)" />
@@ -20,6 +21,7 @@
 				<Handler Alias="vendrCountryHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrEmailTemplateHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />
                 <Handler Alias="vendrPrintTemplateHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />
+                <Handler Alias="vendrExportTemplateHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrOrderStatusHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrPaymentMethodHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />
 				<Handler Alias="vendrRegionHandler" Enabled="true" xdt:Transform="Insert" xdt:Locator="Match(Alias)" />

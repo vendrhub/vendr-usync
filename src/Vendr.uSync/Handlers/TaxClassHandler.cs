@@ -19,7 +19,6 @@ using Microsoft.Extensions.Logging;
 
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Strings;
-
 using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
@@ -54,7 +53,6 @@ namespace Vendr.uSync.Handlers
 
         protected override IEnumerable<TaxClassReadOnly> GetByStore(Guid storeId)
             => _vendrApi.GetTaxClasses(storeId);
-
 
         public void Handle(IEvent evt)
         {

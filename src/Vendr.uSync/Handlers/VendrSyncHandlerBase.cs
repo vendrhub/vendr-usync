@@ -150,13 +150,12 @@ namespace Vendr.uSync.Handlers
 
         protected override void InitializeEvents(HandlerSettings settings) { }
 #endif
+
         protected override TObject GetFromService(TObject item)
             => item;
 
         protected override IEnumerable<TObject> GetFolders(TObject parent)
             => Enumerable.Empty<TObject>();
-
-
 
         protected virtual void VendrItemSaved(TObject item)
         {
@@ -168,6 +167,7 @@ namespace Vendr.uSync.Handlers
         protected virtual void VendrItemDeleted(TObject item)
         {
             if (!ShouldProcessEvent()) return;
+
             ExportDeletedItem(item, Path.Combine(rootFolder, DefaultFolder), DefaultConfig);
         }
 

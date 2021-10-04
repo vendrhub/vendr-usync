@@ -29,6 +29,8 @@ class Build : NukeBuild
     [PackageExecutable(packageId: "Umbraco.Tools.Packages", packageExecutable: "UmbPack.dll")]
     readonly Tool UmbPack;
 
+    readonly string ProjectName = "Vendr.uSync";
+
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
     AbsolutePath ArtifactFilesDirectory => ArtifactsDirectory / "files";
@@ -77,7 +79,7 @@ class Build : NukeBuild
     private void CopyUIFiles()
     {
         // Copy UI files
-        CopyDirectoryRecursively(SourceDirectory / "Vendr.uSync" / "Web" /"UI", ArtifactFilesDirectory);
+        CopyDirectoryRecursively(SourceDirectory / ProjectName / "Web" /"UI", ArtifactFilesDirectory);
 
         // Copy package assets
         CopyDirectoryRecursively(RootDirectory / "assets", ArtifactFilesDirectory / "assets");
@@ -111,7 +113,7 @@ class Build : NukeBuild
     private void PackUmbracoPackage()
     {
         var umbracoPackageXmlDir = BuildProjectDirectory / "Umbraco";
-        var umbracoPackageXmlFile = umbracoPackageXmlDir / $"Vendr.uSync.package.xml";
+        var umbracoPackageXmlFile = umbracoPackageXmlDir / $"{ProjectName}.package.xml";
 
         UmbPack($"pack {umbracoPackageXmlFile} -n {{name}}.{{version}}.zip -v {GitVersion.NuGetVersion} -o {ArtifactPackagesDirectory} -p Configuration={Configuration};ArtifactsDirectory={ArtifactsDirectory}", workingDirectory: RootDirectory);
     }

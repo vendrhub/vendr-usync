@@ -87,18 +87,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(StoreReadOnly item)
             => item.Name;
 
+        public void Handle(StoreSavedNotification notification)
+            => VendrItemSaved(notification.Store);
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case StoreSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.Store);
-                    break;
-                case StoreDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.Store);
-                    break;
-            }
-        }
+        public void Handle(StoreDeletedNotification notification)
+            => VendrItemDeleted(notification.Store);
     }
 }

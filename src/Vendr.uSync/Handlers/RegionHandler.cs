@@ -57,17 +57,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(RegionReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case RegionSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.Region);
-                    break;
-                case RegionDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.Region);
-                    break;
-            }
-        }
+        public void Handle(RegionSavedNotification notification)
+            => VendrItemSaved(notification.Region);
+
+        public void Handle(RegionDeletedNotification notification)
+            => VendrItemDeleted(notification.Region);
     }
 }

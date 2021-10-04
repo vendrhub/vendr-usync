@@ -59,18 +59,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(CountryReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case CountrySavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.Country);
-                    break;
-                case CountryDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.Country);
-                    break;
-            }
-        }
+        public void Handle(CountrySavedNotification notification)
+            => VendrItemSaved(notification.Country);
 
+        public void Handle(CountryDeletedNotification notification)
+            => VendrItemDeleted(notification.Country);
     }
 }

@@ -52,18 +52,11 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(CurrencyReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case CurrencySavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.Currency);
-                    break;
-                case CurrencyDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.Currency);
-                    break;
-            }
-        }
 
+        public void Handle(CurrencySavedNotification notification)
+            => VendrItemSaved(notification.Currency);
+
+        public void Handle(CurrencyDeletedNotification notification)
+            => VendrItemDeleted(notification.Currency);
     }
 }

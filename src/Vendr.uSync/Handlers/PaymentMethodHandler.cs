@@ -56,17 +56,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(PaymentMethodReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case PaymentMethodSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.PaymentMethod);
-                    break;
-                case PaymentMethodDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.PaymentMethod);
-                    break;
-            }
-        }
+        public void Handle(PaymentMethodSavedNotification notification)
+            => VendrItemSaved(notification.PaymentMethod);
+
+        public void Handle(PaymentMethodDeletedNotification notification)
+            => VendrItemDeleted(notification.PaymentMethod);
     }
 }

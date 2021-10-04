@@ -52,17 +52,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(ExportTemplateReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case ExportTemplateSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.ExportTemplate);
-                    break;
-                case ExportTemplateDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.ExportTemplate);
-                    break;
-            }
-        }
+        public void Handle(ExportTemplateSavedNotification notification)
+            => VendrItemSaved(notification.ExportTemplate);
+
+        public void Handle(ExportTemplateDeletedNotification notification)
+            => VendrItemDeleted(notification.ExportTemplate);
     }
 }

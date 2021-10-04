@@ -54,17 +54,10 @@ namespace Vendr.uSync.Handlers
         protected override IEnumerable<TaxClassReadOnly> GetByStore(Guid storeId)
             => _vendrApi.GetTaxClasses(storeId);
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case TaxClassSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.TaxClass);
-                    break;
-                case TaxClassDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.TaxClass);
-                    break;
-            }
-        }
+        public void Handle(TaxClassSavedNotification notification)
+            => VendrItemSaved(notification.TaxClass);
+
+        public void Handle(TaxClassDeletedNotification notification)
+            => VendrItemDeleted(notification.TaxClass);
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
+using Vendr.Common.Events;
 
 #if NETFRAMEWORK
 using Umbraco.Core;
@@ -33,7 +34,7 @@ using Microsoft.Extensions.Logging;
 namespace Vendr.uSync.Handlers
 {
     public abstract class VendrSyncHandlerBase<TObject> :
-        SyncHandlerRoot<TObject, TObject>
+        SyncHandlerRoot<TObject, TObject>, IEventHandler
         where TObject : EntityBase
     {
         protected IVendrApi _vendrApi;
@@ -121,7 +122,7 @@ namespace Vendr.uSync.Handlers
             return base.ShouldImport(node, config);
         }
 
-        
+
 
         /// <summary>
         ///  Handles the deleting of items in Umbraco but not the sync.
@@ -183,6 +184,23 @@ namespace Vendr.uSync.Handlers
             if (!DefaultConfig.Enabled) return false;
 #endif
             return true;
+        }
+
+        /// <summary>
+        ///  make the handling of vendr events a bit more generic, so we can clean up the handler code a bit. 
+        /// </summary>
+        void IEventHandler.Handle(IEvent evt)
+        {
+            var eventType = evt.GetType();
+            if (typeof(INotificationEvent).IsAssignableFrom(eventType))
+            {
+                var handlerType = typeof(IEventHandlerFor<>).MakeGenericType(eventType);
+                if (handlerType.IsAssignableFrom(GetType()))
+                {
+                    var handleMethod = handlerType.GetMethod("Handle", new[] { eventType });
+                    handleMethod.Invoke(this, new[] { evt });
+                }
+            }
         }
     }
 }

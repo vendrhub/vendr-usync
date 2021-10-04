@@ -55,17 +55,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(PrintTemplateReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case PrintTemplateSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.PrintTemplate);
-                    break;
-                case PrintTemplateDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.PrintTemplate);
-                    break;
-            }
-        }
+        public void Handle(PrintTemplateSavedNotification notification)
+            => VendrItemSaved(notification.PrintTemplate);
+
+        public void Handle(PrintTemplateDeletedNotification notification)
+            => VendrItemDeleted(notification.PrintTemplate);
     }
 }

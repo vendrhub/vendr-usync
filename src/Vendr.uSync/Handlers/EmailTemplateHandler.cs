@@ -52,18 +52,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(EmailTemplateReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case EmailTemplateSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.EmailTemplate);
-                    break;
-                case EmailTemplateDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.EmailTemplate);
-                    break;
-            }
-        }
+        public void Handle(EmailTemplateSavedNotification notification)
+            => VendrItemSaved(notification.EmailTemplate);
 
+        public void Handle(EmailTemplateDeletedNotification notification)
+            => VendrItemDeleted(notification.EmailTemplate);
     }
 }

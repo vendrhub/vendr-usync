@@ -58,17 +58,10 @@ namespace Vendr.uSync.Handlers
         protected override string GetItemName(ShippingMethodReadOnly item)
             => item.Name;
 
-        public void Handle(IEvent evt)
-        {
-            switch (evt)
-            {
-                case ShippingMethodSavedNotification savedNotification:
-                    VendrItemSaved(savedNotification.ShippingMethod);
-                    break;
-                case ShippingMethodDeletedNotification deletedNotification:
-                    VendrItemDeleted(deletedNotification.ShippingMethod);
-                    break;
-            }
-        }
+        public void Handler(ShippingMethodSavedNotification notification)
+            => VendrItemSaved(notification.ShippingMethod);
+
+        public void Handler(ShippingMethodDeletedNotification notification)
+            => VendrItemDeleted(notification.ShippingMethod);
     }
 }

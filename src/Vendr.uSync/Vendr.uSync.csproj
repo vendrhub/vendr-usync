@@ -15,18 +15,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Vendr.Core" Version="2.0.0-rc0050" />
-        <PackageReference Include="Vendr.Umbraco.Startup" Version="2.0.0-rc0050" />
+        <PackageReference Include="Vendr.Core" Version="2.0.0" />
+        <PackageReference Include="Vendr.Umbraco.Startup" Version="2.0.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-        <PackageReference Include="uSync.BackOffice.Core" Version="8.10.2" />
+        <PackageReference Include="uSync.BackOffice.Core" Version="8.10.3" />
 		<PackageReference Include="Microsoft.Web.Xdt" Version="3.1.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-        <PackageReference Include="uSync.Core" Version="9.0.0.1" />
-        <PackageReference Include="uSync.BackOffice" Version="9.0.0.1" />
+        <PackageReference Include="uSync.Core" Version="9.0.1" />
+        <PackageReference Include="uSync.BackOffice" Version="9.0.1" />
     </ItemGroup>
 
     <!-- Workaround for this bug (replace the analyzer name with the one you need to exclude (filename only, no extension) -->

@@ -14,6 +14,8 @@ using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Vendr.Extensions;
 using Vendr.Umbraco;
+using Umbraco.Cms.Core;
+using Vendr.uSync.ServiceConnectors;
 #endif
 
 namespace Vendr.uSync
@@ -41,6 +43,7 @@ namespace Vendr.uSync
             composition.Register<ISyncSerializer<RegionReadOnly>, RegionSerializer>();
             composition.Register<ISyncSerializer<ShippingMethodReadOnly>, ShippingMethodSerializer>();
             composition.Register<ISyncSerializer<TaxClassReadOnly>, TaxClassSerializer>();
+
         }
 #else
         public void Compose(IUmbracoBuilder builder)
@@ -50,6 +53,19 @@ namespace Vendr.uSync
             // that Vendr has been initialized so we'll call AddVendr
             // which should auto escape if it's already been added
             builder.AddVendr();
+
+            // in v9 looks like you have to register service connectors.
+            // they are autodiscovered in v8.
+            UdiParserServiceConnectors.RegisterServiceConnector<StoreServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<OrderStatusServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<ShippingMethodServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<CountryServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<CurrencyServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<PaymentServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<TaxServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<EmailTemplateServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<ExportTemplateServiceConnector>();
+            UdiParserServiceConnectors.RegisterServiceConnector<PrintTemplateServiceConnector>();
         }
 #endif
     }

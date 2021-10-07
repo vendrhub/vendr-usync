@@ -3,5 +3,6 @@
 	<area alias="usync">
 		<key alias="import-vendr">Import Vendr settings</key>
 		<key alias="report-vendr">Report Vendr settings</key>
+		<key alias="vendr-description">Sync vendr settings</key>
 	</area>
 </language>

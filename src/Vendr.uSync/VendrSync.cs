@@ -15,7 +15,12 @@ namespace Vendr.uSync
     /// <remarks>
     ///  Not strictly required, just lets people see its installed.
     /// </remarks>
+#if NETFRAMEWORK
     [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
+    #else
+    [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
+    #endif
+
     public class VendrSync : ISyncAddOn
     {
         public string Name => "Vendr.uSync";

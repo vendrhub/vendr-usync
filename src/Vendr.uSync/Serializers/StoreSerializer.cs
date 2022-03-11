@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
 using Vendr.Common;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core;
@@ -32,12 +33,13 @@ namespace Vendr.uSync.Serializers
 
         public StoreSerializer(
             IUserService userService,
-            IVendrApi vendrApi,
+            IVendrApi vendrApi, 
+            VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<StoreSerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<StoreSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         {
             _userService = userService;

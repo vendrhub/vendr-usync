@@ -7,6 +7,7 @@ using Vendr.Core.Models;
 using Vendr.Common;
 
 using Vendr.uSync.Extensions;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core;
@@ -30,12 +31,12 @@ namespace Vendr.uSync.Serializers
         ISyncSerializer<CurrencyReadOnly>
     {
         public CurrencySerializer(
-            IVendrApi vendrApi,
+            IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<CurrencySerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<CurrencySerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         {
             _vendrApi = vendrApi;

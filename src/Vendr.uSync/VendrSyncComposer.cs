@@ -1,4 +1,6 @@
-﻿#if NETFRAMEWORK
+﻿using Vendr.uSync.Configuration;
+
+#if NETFRAMEWORK
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Vendr.Core.Models;
@@ -13,7 +15,7 @@ using uSync.BackOffice;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Vendr.Extensions;
-using Vendr.Umbraco;
+using Microsoft.Extensions.DependencyInjection;
 #endif
 
 namespace Vendr.uSync
@@ -28,6 +30,9 @@ namespace Vendr.uSync
 #if NETFRAMEWORK
         public void Compose(Composition composition)
         {
+            composition.Register<VendrSyncSettings>(Lifetime.Singleton);
+            composition.Register<VendrSyncSettingsAccessor>(Lifetime.Singleton);
+
             composition.Register<ISyncSerializer<StoreReadOnly>, StoreSerializer>();
             composition.Register<ISyncSerializer<CurrencyReadOnly>, CurrencySerializer>();
             composition.Register<ISyncSerializer<CountryReadOnly>, CountrySerializer>();
@@ -45,6 +50,10 @@ namespace Vendr.uSync
 #else
         public void Compose(IUmbracoBuilder builder)
         {
+            builder.Services.AddOptions<VendrSyncSettings>()
+                .Bind(builder.Config.GetSection("Vendr.uSync"));
+            builder.Services.AddSingleton<VendrSyncSettingsAccessor>();
+
             // No need to register serializers in v9 as they
             // are auto discovered however we do need to ensure
             // that Vendr has been initialized so we'll call AddVendr

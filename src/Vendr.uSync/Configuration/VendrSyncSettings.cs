@@ -10,22 +10,22 @@ namespace Vendr.uSync.Configuration
 {
     public class VendrSyncSettings
     {
-        public VendrSyncPaymentProviderSettings PaymentProviders { get; set; }
+        public VendrSyncPaymentMethodSettings PaymentMethods { get; set; }
 
         public VendrSyncSettings()
         {
-            PaymentProviders = new VendrSyncPaymentProviderSettings();
+            PaymentMethods = new VendrSyncPaymentMethodSettings();
         }
     }
 
-    public class VendrSyncPaymentProviderSettings
+    public class VendrSyncPaymentMethodSettings
     {
         public string[] IgnoreSettings { get; set; }
 
-        public VendrSyncPaymentProviderSettings()
+        public VendrSyncPaymentMethodSettings()
         {
 #if NETFRAMEWORK
-            IgnoreSettings = (ConfigurationManager.AppSettings["Vendr.uSync:PaymentProviders:IgnoreSettings"] ?? "")
+            IgnoreSettings = (ConfigurationManager.AppSettings["Vendr.uSync:PaymentMethods:IgnoreSettings"] ?? "")
                 .Split(new[] { "," }, System.StringSplitOptions.RemoveEmptyEntries)
                 .ToArray();
 #else

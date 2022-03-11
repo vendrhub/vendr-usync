@@ -72,7 +72,7 @@ namespace Vendr.uSync.Serializers
 
             if (values != null && values.Any())
             {
-                foreach (var setting in values.Where(x => !StringExtensions.InvariantContains(_settingsAccessor.Settings.PaymentProviders.IgnoreSettings, x.Key)))
+                foreach (var setting in values.Where(x => !StringExtensions.InvariantContains(_settingsAccessor.Settings.PaymentMethods.IgnoreSettings, x.Key)))
                 {
                     root.Add(new XElement("Setting",
                         new XElement("Key", setting.Key),

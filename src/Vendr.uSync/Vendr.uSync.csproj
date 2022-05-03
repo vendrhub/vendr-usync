@@ -41,8 +41,6 @@
             <Pack>True</Pack>
             <PackagePath></PackagePath>
         </None>
-    </ItemGroup>
-    <ItemGroup>
         <None Include="Web\UI\App_Plugins\**\*.*">
             <Pack>True</Pack>
             <PackagePath>content\App_Plugins</PackagePath>

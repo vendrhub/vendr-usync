@@ -15,7 +15,6 @@ using uSync.BackOffice;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Vendr.Extensions;
-using Vendr.Umbraco;
 using Umbraco.Cms.Core;
 using Vendr.uSync.ServiceConnectors;
 using Microsoft.Extensions.DependencyInjection;

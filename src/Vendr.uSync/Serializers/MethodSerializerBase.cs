@@ -9,6 +9,7 @@ using Vendr.Core.Models;
 
 using Vendr.uSync.Extensions;
 using Vendr.uSync.SyncModels;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core.Logging;
@@ -27,12 +28,12 @@ namespace Vendr.uSync.Serializers
     public abstract class MethodSerializerBase<TObject> : VendrSerializerBase<TObject>
         where TObject : EntityBase
     {
-        protected MethodSerializerBase(IVendrApi vendrApi, 
+        protected MethodSerializerBase(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<MethodSerializerBase<TObject>> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<MethodSerializerBase<TObject>> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         { }
 

@@ -6,6 +6,7 @@ using Vendr.Core.Models;
 using Vendr.Common;
 
 using Vendr.uSync.Extensions;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core.Logging;
@@ -26,12 +27,12 @@ namespace Vendr.uSync.Serializers
 
     public class EmailTemplateSerializer : VendrSerializerBase<EmailTemplateReadOnly>, ISyncSerializer<EmailTemplateReadOnly>
     {
-        public EmailTemplateSerializer(IVendrApi vendrApi, 
+        public EmailTemplateSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<EmailTemplateSerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<EmailTemplateSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         { }
 

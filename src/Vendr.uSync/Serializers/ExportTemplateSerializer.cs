@@ -6,6 +6,7 @@ using Vendr.Core.Models;
 using Vendr.Common;
 
 using Vendr.uSync.Extensions;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core.Logging;
@@ -25,12 +26,12 @@ namespace Vendr.uSync.Serializers
     [SyncSerializer("6D4C64D0-B840-47F7-AF92-61A1C86D892E", "Export Template Serializer", VendrConstants.Serialization.ExportTemplate)]
     public class ExportTemplateSerializer : VendrSerializerBase<ExportTemplateReadOnly>, ISyncSerializer<ExportTemplateReadOnly>
     {
-        public ExportTemplateSerializer(IVendrApi vendrApi, 
+        public ExportTemplateSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<ExportTemplateSerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<ExportTemplateSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         { }
 

@@ -94,7 +94,7 @@ namespace Vendr.uSync.Handlers
                 {
                     if (result.Success)
                     {
-                        var attempt = ImportSecondPass(result, config, null);
+                        var attempt = ImportSecondPass(result, config, new uSyncImportOptions());
                         // postActions.Add();
                     }
                 }

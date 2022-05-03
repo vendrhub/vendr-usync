@@ -6,6 +6,7 @@ using Vendr.Core.Models;
 using Vendr.Common;
 
 using Vendr.uSync.Extensions;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core.Logging;
@@ -28,12 +29,12 @@ namespace Vendr.uSync.Serializers
         , ISyncNodeSerializer<OrderStatusReadOnly>
 #endif
     {
-        public OrderStatusSerializer(IVendrApi vendrApi, 
+        public OrderStatusSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<OrderStatusSerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<OrderStatusSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         { }
 

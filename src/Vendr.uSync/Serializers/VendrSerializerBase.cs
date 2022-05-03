@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
 using Vendr.Common;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core;
@@ -31,6 +32,7 @@ namespace Vendr.uSync.Serializers
         where TObject : EntityBase
     {
         protected IVendrApi _vendrApi;
+        protected VendrSyncSettingsAccessor _settingsAccessor;
         protected IUnitOfWorkProvider _uowProvider;
 
         protected readonly Type _itemType = typeof(TObject);
@@ -39,6 +41,7 @@ namespace Vendr.uSync.Serializers
 
         protected VendrSerializerBase(
             IVendrApi vendrApi,
+            VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
             ILogger logger) : base(logger)
@@ -47,6 +50,7 @@ namespace Vendr.uSync.Serializers
 #endif
         {
             _vendrApi = vendrApi;
+            _settingsAccessor = settingsAccessor;
             _uowProvider = uowProvider;
         }
 

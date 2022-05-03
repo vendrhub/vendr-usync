@@ -8,6 +8,9 @@ using Vendr.Core.Models;
 using Vendr.Common;
 
 using Vendr.uSync.Extensions;
+using Vendr.uSync.Configuration;
+
+using StringExtensions = Vendr.Extensions.StringExtensions;
 
 #if NETFRAMEWORK
 using Umbraco.Core.Logging;
@@ -27,12 +30,12 @@ namespace Vendr.uSync.Serializers
     [SyncSerializer("707A16D7-AAA8-4399-8CF4-BEC82B8F6C8E", "PaymentMethod Serializer", VendrConstants.Serialization.PaymentMethod)]
     public class PaymentMethodSeralizer : MethodSerializerBase<PaymentMethodReadOnly>, ISyncSerializer<PaymentMethodReadOnly>
     {
-        public PaymentMethodSeralizer(IVendrApi vendrApi, 
+        public PaymentMethodSeralizer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<PaymentMethodSeralizer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<PaymentMethodSeralizer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         { }
 
@@ -69,7 +72,7 @@ namespace Vendr.uSync.Serializers
 
             if (values != null && values.Any())
             {
-                foreach (var setting in values)
+                foreach (var setting in values.Where(x => !StringExtensions.InvariantContains(_settingsAccessor.Settings.PaymentMethods.IgnoreSettings, x.Key)))
                 {
                     root.Add(new XElement("Setting",
                         new XElement("Key", setting.Key),
@@ -154,7 +157,7 @@ namespace Vendr.uSync.Serializers
                 }
             }
 
-            item.SetSettings(settings, SetBehavior.Replace);
+            item.SetSettings(settings, SetBehavior.Merge);
         }
 
         private void DeserializeCountryRegions(XElement node, PaymentMethod item)

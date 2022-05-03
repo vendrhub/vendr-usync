@@ -6,6 +6,7 @@ using Vendr.Core.Models;
 using Vendr.Common;
 
 using Vendr.uSync.Extensions;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Umbraco.Core.Logging;
@@ -25,12 +26,12 @@ namespace Vendr.uSync.Serializers
     [SyncSerializer("62503EA1-6B7E-4567-92E2-9B67E2408434", "Region Serializer", VendrConstants.Serialization.Region)]
     public class RegionSerializer : VendrSerializerBase<RegionReadOnly>, ISyncSerializer<RegionReadOnly>
     {
-        public RegionSerializer(IVendrApi vendrApi, 
+        public RegionSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<RegionSerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<RegionSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
         { }
 

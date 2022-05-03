@@ -8,6 +8,7 @@ using Vendr.Core.Models;
 using Vendr.Common;
 using Vendr.uSync.Extensions;
 using Vendr.uSync.SyncModels;
+using Vendr.uSync.Configuration;
 
 #if NETFRAMEWORK
 using Vendr.Core;
@@ -29,14 +30,14 @@ namespace Vendr.uSync.Serializers
     [SyncSerializer("22F98052-DD59-4A0C-AA13-52398B794ED5", "TaxClass Serializer", VendrConstants.Serialization.TaxClass)]
     public class TaxClassSerializer : VendrSerializerBase<TaxClassReadOnly>, ISyncSerializer<TaxClassReadOnly>
     {
-        public TaxClassSerializer(IVendrApi vendrApi,
+        public TaxClassSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
 #if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, uowProvider, logger)
+            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #else
-            ILogger<TaxClassSerializer> logger) : base(vendrApi, uowProvider, logger)
+            ILogger<TaxClassSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
 #endif
-        {  }
+        { }
 
         protected override SyncAttempt<XElement> SerializeCore(TaxClassReadOnly item, SyncSerializerOptions options)
         {

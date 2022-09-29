@@ -7,20 +7,11 @@ using Vendr.Core.Models;
 using Vendr.Common;
 using Vendr.uSync.Configuration;
 
-#if NETFRAMEWORK
-using Umbraco.Core;
-using Umbraco.Core.Logging;
-using uSync8.Core;
-using uSync8.Core.Models;
-using uSync8.Core.Extensions;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Umbraco.Extensions;
 using Microsoft.Extensions.Logging;
-#endif
 
 namespace Vendr.uSync.Serializers
 {
@@ -43,37 +34,13 @@ namespace Vendr.uSync.Serializers
             IVendrApi vendrApi,
             VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(logger)
-#else
             ILogger<VendrSerializerBase<TObject>> logger) : base(logger)
-#endif
         {
             _vendrApi = vendrApi;
             _settingsAccessor = settingsAccessor;
             _uowProvider = uowProvider;
         }
 
-#if NETFRAMEWORK
-        protected override Guid ItemKey(TObject item)
-            => item.Id;
-
-        protected override string ItemAlias(TObject item)
-            => GetItemAlias(item);
-
-        protected override TObject FindItem(string alias)
-            => null;
-
-        protected override TObject FindItem(Guid key)
-            => DoFindItem(key);
-
-        protected override void DeleteItem(TObject item)
-            => DoDeleteItem(item);
-
-        protected override void SaveItem(TObject item)
-            => DoSaveItem(item);
-
-#else
         public override Guid ItemKey(TObject item)
             => item.Id;
 
@@ -94,7 +61,6 @@ namespace Vendr.uSync.Serializers
 
         public override void SaveItem(TObject item)
             => DoSaveItem(item);
-#endif
 
         public virtual string GetItemAlias(TObject item)
             => null;
@@ -142,20 +108,12 @@ namespace Vendr.uSync.Serializers
 
         protected SyncAttempt<T> SyncAttemptSucceed<T>(string name, T item, ChangeType change, bool saved = false, IList<uSyncChange> changes = null)
         {
-#if NETFRAMEWORK
-            return SyncAttempt<T>.Succeed(name, item, change, saved, changes ?? _noSyncChanges);
-#else
             return SyncAttempt<T>.Succeed(name, item, change, null, saved, changes ?? _noSyncChanges);
-#endif
         }
 
         protected SyncAttempt<T> SyncAttemptSucceedIf<T>(bool condition, string name, T item, ChangeType change)
         {
-#if NETFRAMEWORK
-            return SyncAttempt<T>.SucceedIf(condition, name, item, change);
-#else
             return SyncAttempt<T>.SucceedIf(condition, name, item, _itemType, change);
-#endif
         }
     }
 }

@@ -10,20 +10,11 @@ using Vendr.uSync.Extensions;
 using Vendr.uSync.SyncModels;
 using Vendr.uSync.Configuration;
 
-#if NETFRAMEWORK
-using Vendr.Core;
-using Umbraco.Core.Logging;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Umbraco.Extensions;
 using Microsoft.Extensions.Logging;
-#endif
 
 namespace Vendr.uSync.Serializers
 {
@@ -32,11 +23,7 @@ namespace Vendr.uSync.Serializers
     {
         public TaxClassSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<TaxClassSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(TaxClassReadOnly item, SyncSerializerOptions options)

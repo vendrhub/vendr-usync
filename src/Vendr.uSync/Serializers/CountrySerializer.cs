@@ -7,20 +7,11 @@ using Vendr.Common;
 
 using Vendr.uSync.Extensions;
 using Vendr.uSync.Configuration;
-
-#if NETFRAMEWORK
-using Umbraco.Core.Logging;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
-using Umbraco.Extensions;
-#endif
+
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("A5C0B948-BA5F-45FF-B6E6-EBA0BB3C6139", "Country Serializer", VendrConstants.Serialization.Country)]
@@ -30,11 +21,7 @@ namespace Vendr.uSync.Serializers
         public CountrySerializer(
             IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<CountrySerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif        
         { }
 
         /// <summary>

@@ -4,16 +4,11 @@ using System.Linq;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
 
-using static Vendr.Umbraco.Constants.Trees.Settings;
-
-#if NETFRAMEWORK
-using uSync8.Core.Sync;
-using Umbraco.Core;
-#else
 using uSync.Core.Sync;
 using Umbraco.Cms.Core;
 using Umbraco.Extensions;
-#endif
+
+using static Vendr.Umbraco.Constants.Trees.Settings;
 
 
 namespace Vendr.uSync.SyncManagers

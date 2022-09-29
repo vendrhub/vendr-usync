@@ -10,20 +10,12 @@ using Vendr.Common;
 using Vendr.uSync.Extensions;
 using Vendr.uSync.Configuration;
 
-using StringExtensions = Vendr.Extensions.StringExtensions;
-
-#if NETFRAMEWORK
-using Umbraco.Core.Logging;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
-#endif
+
+using StringExtensions = Vendr.Extensions.StringExtensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -32,11 +24,7 @@ namespace Vendr.uSync.Serializers
     {
         public PaymentMethodSeralizer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<PaymentMethodSeralizer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(PaymentMethodReadOnly item, SyncSerializerOptions options)

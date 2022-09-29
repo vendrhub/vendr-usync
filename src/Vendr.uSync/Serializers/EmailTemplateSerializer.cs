@@ -12,6 +12,7 @@ using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -61,9 +62,10 @@ namespace Vendr.uSync.Serializers
             var name = node.Element(nameof(readOnlyItem.Name)).ValueOrDefault(alias);
             var storeId = node.GetStoreId();
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 EmailTemplate item;
+
                 if (readOnlyItem == null)
                 {
                     item = EmailTemplate.Create(uow, id, storeId, alias, name);
@@ -89,10 +91,8 @@ namespace Vendr.uSync.Serializers
 
                 _vendrApi.SaveEmailTemplate(item);
 
-                uow.Complete();
-
-                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
-            }
+                return uow.Complete(SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import));
+            });
         }
 
         // 
@@ -108,12 +108,12 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(EmailTemplateReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
                 _vendrApi.SaveEmailTemplate(entity);
                 uow.Complete();
-            }
+            });
         }
     }
 }

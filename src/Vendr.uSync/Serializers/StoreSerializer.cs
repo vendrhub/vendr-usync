@@ -13,6 +13,7 @@ using uSync.Core.Serialization;
 using Umbraco.Extensions;
 using Umbraco.Cms.Core.Services;
 using Microsoft.Extensions.Logging;
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -130,9 +131,10 @@ namespace Vendr.uSync.Serializers
             var id = node.GetKey();
             var name = node.Element("Name").ValueOrDefault(alias);
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 Store store;
+
                 if (readOnlyStore == null)
                 {
                     store = Store.Create(uow, id, alias, name, false);
@@ -216,10 +218,8 @@ namespace Vendr.uSync.Serializers
 
                 _vendrApi.SaveStore(store);
 
-                uow.Complete();
-
-                return SyncAttemptSucceed(name, store.AsReadOnly(), ChangeType.Import, true);
-            }
+                return uow.Complete(SyncAttemptSucceed(name, store.AsReadOnly(), ChangeType.Import, true));
+            });
         }
 
         private void DeserializeAllowedRoles(XElement node, Store store)
@@ -284,7 +284,7 @@ namespace Vendr.uSync.Serializers
             if (item == null) return SyncAttempt<StoreReadOnly>.Fail(node.GetAlias(), ChangeType.ImportFail, "Store Item not set for second pass");
 
             // currency 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 var store = item.AsWritable(uow);
 
@@ -300,10 +300,9 @@ namespace Vendr.uSync.Serializers
                 }
 
                 _vendrApi.SaveStore(store);
-                uow.Complete();
 
-                return SyncAttemptSucceed(store.Name, store.AsReadOnly(), ChangeType.Import, true);
-            }
+                return uow.Complete(SyncAttemptSucceed(store.Name, store.AsReadOnly(), ChangeType.Import, true));
+            });
 
         }
 
@@ -380,12 +379,12 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(StoreReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
                 _vendrApi.SaveStore(entity);
                 uow.Complete();
-            }
+            });
         }
 
         public override void DoDeleteItem(StoreReadOnly item)

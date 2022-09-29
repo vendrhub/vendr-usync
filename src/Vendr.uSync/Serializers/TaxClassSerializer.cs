@@ -15,6 +15,7 @@ using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Umbraco.Extensions;
 using Microsoft.Extensions.Logging;
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -71,9 +72,10 @@ namespace Vendr.uSync.Serializers
             var storeId = node.GetStoreId();
             var defaultTaxRate = node.Element(nameof(readonlyItem.DefaultTaxRate)).ValueOrDefault((decimal)0);
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 TaxClass item;
+
                 if (readonlyItem == null)
                 {
                     item = TaxClass.Create(uow, id, storeId, alias, name, defaultTaxRate);
@@ -92,10 +94,8 @@ namespace Vendr.uSync.Serializers
 
                 _vendrApi.SaveTaxClass(item);
 
-                uow.Complete();
-
-                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
-            }
+                return uow.Complete(SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import));
+            });
         }
 
         protected List<SyncTaxRateModel> GetTaxRates(XElement node)
@@ -164,12 +164,14 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(TaxClassReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
+
                 _vendrApi.SaveTaxClass(entity);
+
                 uow.Complete();
-            }
+            });
         }
     }
 }

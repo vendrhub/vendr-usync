@@ -11,6 +11,7 @@ using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -41,9 +42,10 @@ namespace Vendr.uSync.Serializers
             var storeId = node.GetStoreId();
             var code = node.Element(nameof(readOnlyCountry.Code)).ValueOrDefault(string.Empty);
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 Country country;
+
                 if (readOnlyCountry == null)
                 {
                     country = Country.Create(uow, id, storeId, code, name);
@@ -60,26 +62,28 @@ namespace Vendr.uSync.Serializers
                 country.SetSortOrder(sortOrder);
 
                 var defaultCurrencyId = node.Element(nameof(country.DefaultCurrencyId)).ValueOrDefault(country.DefaultCurrencyId);
-                if (defaultCurrencyId.HasValue && _vendrApi.GetCurrency(defaultCurrencyId.Value) != null) {
+                if (defaultCurrencyId.HasValue && _vendrApi.GetCurrency(defaultCurrencyId.Value) != null)
+                {
                     country.SetDefaultCurrency(defaultCurrencyId);
                 }
 
                 var defaultPaymentId = node.Element(nameof(country.DefaultPaymentMethodId)).ValueOrDefault(country.DefaultPaymentMethodId);
-                if (defaultPaymentId.HasValue && _vendrApi.GetPaymentMethod(defaultPaymentId.Value) != null) {
+                if (defaultPaymentId.HasValue && _vendrApi.GetPaymentMethod(defaultPaymentId.Value) != null)
+                {
                     country.SetDefaultPaymentMethod(defaultPaymentId);
                 }
 
                 var defaultShippingId = node.Element(nameof(country.DefaultShippingMethodId)).ValueOrDefault(country.DefaultShippingMethodId);
-                if (defaultShippingId.HasValue && _vendrApi.GetShippingMethod(defaultShippingId.Value) != null) {
+                if (defaultShippingId.HasValue && _vendrApi.GetShippingMethod(defaultShippingId.Value) != null)
+                {
                     country.SetDefaultShippingMethod(defaultShippingId);
                 }
 
                 _vendrApi.SaveCountry(country);
 
-                uow.Complete();
+                return uow.Complete(SyncAttemptSucceed(name, country.AsReadOnly(), ChangeType.Import, true));
 
-                return SyncAttemptSucceed(name, country.AsReadOnly(), ChangeType.Import, true);
-            }
+            });
         }
 
 
@@ -108,15 +112,17 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(CountryReadOnly item)
         {
+            _uowProvider.Execute(uow =>
             {
-                using (var uow = _uowProvider.Create())
-                {
-                    var entity = item.AsWritable(uow);
-                    _vendrApi.SaveCountry(entity);
-                    uow.Complete();
-                }
-            }
+                var entity = item.AsWritable(uow);
+
+                _vendrApi.SaveCountry(entity);
+
+                uow.Complete();
+
+            });
         }
+
         public override void DoDeleteItem(CountryReadOnly item)
             => _vendrApi.DeleteCountry(item.Id);
 

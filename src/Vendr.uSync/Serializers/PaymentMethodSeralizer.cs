@@ -16,6 +16,7 @@ using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
 
 using StringExtensions = Vendr.Extensions.StringExtensions;
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -85,9 +86,10 @@ namespace Vendr.uSync.Serializers
             var storeId = node.GetStoreId();
             var providerAlias = node.Element(nameof(readonlyItem.PaymentProviderAlias)).ValueOrDefault(string.Empty);
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 PaymentMethod item;
+
                 if (readonlyItem == null)
                 {
                     item = PaymentMethod.Create(uow, id, storeId, alias, name, providerAlias);
@@ -121,10 +123,8 @@ namespace Vendr.uSync.Serializers
 
                 _vendrApi.SavePaymentMethod(item);
 
-                uow.Complete();
-
-                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
-            }
+                return uow.Complete(SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import));
+            });
         }
 
         private void DeserializeProviderSettings(XElement node, PaymentMethod item)
@@ -243,12 +243,14 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(PaymentMethodReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
+
                 _vendrApi.SavePaymentMethod(entity);
+
                 uow.Complete();
-            }
+            });
         }
     }
 }

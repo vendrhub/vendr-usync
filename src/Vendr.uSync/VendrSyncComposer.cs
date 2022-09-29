@@ -16,6 +16,7 @@ namespace Vendr.uSync
         {
             builder.Services.AddOptions<VendrSyncSettings>()
                 .Bind(builder.Config.GetSection("Vendr.uSync"));
+
             builder.Services.AddSingleton<VendrSyncSettingsAccessor>();
 
             // No need to register serializers in v9 as they

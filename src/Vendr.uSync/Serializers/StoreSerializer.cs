@@ -55,7 +55,9 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.GiftCardActivationMethod), (int)item.GiftCardActivationMethod));
 
             // order
+#pragma warning disable CS0618 // Type or member is obsolete
             node.Add(new XElement(nameof(item.OrderEditorConfig), item.OrderEditorConfig));
+#pragma warning restore CS0618 // Type or member is obsolete
             node.Add(new XElement(nameof(item.OrderNumberTemplate), item.OrderNumberTemplate));
 
             node.Add(AddNullableGuid(nameof(item.BaseCurrencyId), item.BaseCurrencyId));
@@ -172,7 +174,9 @@ namespace Vendr.uSync.Serializers
                     store.ClearGiftCardPropertyAliases();
                 }
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 store.SetOrderEditorConfig(node.Element(nameof(store.OrderEditorConfig)).ValueOrDefault(store.OrderEditorConfig));
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 // base currency
                 Guid? currencyId = GetCurrencyId(node, nameof(store.BaseCurrencyId));

@@ -3,7 +3,6 @@ using Nuke.Common.CI;
 using Nuke.Common.Execution;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Utilities.Collections;
@@ -11,7 +10,6 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-[CheckBuildProjectConfigurations]
 [ShutdownDotNetAfterServerBuild]
 class Build : NukeBuild
 {
@@ -23,11 +21,8 @@ class Build : NukeBuild
     [Solution]
     readonly Solution Solution;
 
-    [GitVersion(Framework = "net5.0")]
+    [GitVersion(Framework = "net6.0")]
     readonly GitVersion GitVersion;
-
-    [PackageExecutable(packageId: "Umbraco.Tools.Packages", packageExecutable: "UmbPack.dll")]
-    readonly Tool UmbPack;
 
     readonly string ProjectName = "Vendr.uSync";
 
@@ -110,21 +105,12 @@ class Build : NukeBuild
             .SetNoBuild(true));
     }
 
-    private void PackUmbracoPackage()
-    {
-        var umbracoPackageXmlDir = BuildProjectDirectory / "Umbraco";
-        var umbracoPackageXmlFile = umbracoPackageXmlDir / $"{ProjectName}.package.xml";
-
-        UmbPack($"pack {umbracoPackageXmlFile} -n {{name}}.{{version}}.zip -v {GitVersion.NuGetVersion} -o {ArtifactPackagesDirectory} -p Configuration={Configuration};ArtifactsDirectory={ArtifactsDirectory}", workingDirectory: RootDirectory);
-    }
-
     Target Pack => _ => _
         .DependsOn(Prepare)
         .Produces(ArtifactsDirectory)
         .Executes(() =>
         {
             PackNugetPackage();
-            PackUmbracoPackage();
         });
 
 }

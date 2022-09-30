@@ -6,22 +6,8 @@ using System.Xml.Linq;
 using Vendr.Core.Api;
 using Vendr.Core.Models;
 using Vendr.Common.Events;
-
-#if NETFRAMEWORK
-using Umbraco.Core;
-using Umbraco.Core.Cache;
-using Umbraco.Core.Logging;
-using uSync8.BackOffice;
-using uSync8.BackOffice.Configuration;
-using uSync8.BackOffice.Services;
-using uSync8.BackOffice.SyncHandlers;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Serialization;
-#else
 using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Strings;
-using Umbraco.Extensions;
 using uSync.Core;
 using uSync.Core.Serialization;
 using uSync.BackOffice;
@@ -29,7 +15,6 @@ using uSync.BackOffice.Configuration;
 using uSync.BackOffice.Services;
 using uSync.BackOffice.SyncHandlers;
 using Microsoft.Extensions.Logging;
-#endif
 
 namespace Vendr.uSync.Handlers
 {
@@ -42,14 +27,6 @@ namespace Vendr.uSync.Handlers
 
         public VendrSyncHandlerBase(
             IVendrApi vendrApi,
-#if NETFRAMEWORK
-            IProfilingLogger logger,
-            AppCaches appCaches,
-            ISyncSerializer<TObject> serializer,
-            ISyncItemFactory itemFactory,
-            SyncFileService syncFileService)
-            : base(logger, appCaches, serializer, itemFactory, syncFileService)
-#else
             ILogger<VendrSyncHandlerBase<TObject>> logger, 
             AppCaches appCaches, 
             IShortStringHelper shortStringHelper, 
@@ -58,7 +35,6 @@ namespace Vendr.uSync.Handlers
             uSyncConfigService uSyncConfig, 
             ISyncItemFactory itemFactory)
             : base(logger, appCaches, shortStringHelper, syncFileService, mutexService, uSyncConfig, itemFactory)
-#endif
         {
             _vendrApi = vendrApi;
         }
@@ -135,23 +111,6 @@ namespace Vendr.uSync.Handlers
         protected override IEnumerable<uSyncAction> DeleteMissingItems(TObject parent, IEnumerable<Guid> keysToKeep, bool reportOnly)
                 => Enumerable.Empty<uSyncAction>();
 
-
-#if NETFRAMEWORK
-        // for netcore these methods call the serializer. 
-        protected override TObject GetFromService(int id)
-            => default(TObject);
-
-        protected override TObject GetFromService(string alias)
-            => default(TObject);
-
-        protected override Guid GetItemKey(TObject item)
-            => item.Id;
-        protected override string GetItemPath(TObject item, bool useGuid, bool isFlat)
-            => useGuid ? item.Id.ToString() : GetItemName(item).ToSafeFileName();
-
-        protected override void InitializeEvents(HandlerSettings settings) { }
-#endif
-
         protected override TObject GetFromService(TObject item)
             => item;
 
@@ -175,14 +134,10 @@ namespace Vendr.uSync.Handlers
         /// <summary>
         ///  checks to see if we should process the vendr events/notifications
         /// </summary>
-        private bool ShouldProcessEvent()
+        private new bool ShouldProcessEvent()
         {
-#if NETFRAMEWORK
-            if (uSync8BackOffice.eventsPaused) return false;
-#else
             if (_mutexService.IsPaused) return false;
             if (!DefaultConfig.Enabled) return false;
-#endif
             return true;
         }
 

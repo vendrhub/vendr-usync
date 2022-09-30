@@ -7,22 +7,13 @@ using Vendr.Core.Models;
 using Vendr.Common;
 using Vendr.uSync.Configuration;
 
-#if NETFRAMEWORK
-using Umbraco.Core;
-using Umbraco.Core.Logging;
-using Umbraco.Core.Services;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Umbraco.Extensions;
 using Umbraco.Cms.Core.Services;
 using Microsoft.Extensions.Logging;
-#endif
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -36,11 +27,7 @@ namespace Vendr.uSync.Serializers
             IVendrApi vendrApi, 
             VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<StoreSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif
         {
             _userService = userService;
         }
@@ -69,7 +56,9 @@ namespace Vendr.uSync.Serializers
             node.Add(new XElement(nameof(item.GiftCardActivationMethod), (int)item.GiftCardActivationMethod));
 
             // order
+#pragma warning disable CS0618 // Type or member is obsolete
             node.Add(new XElement(nameof(item.OrderEditorConfig), item.OrderEditorConfig));
+#pragma warning restore CS0618 // Type or member is obsolete
             node.Add(new XElement(nameof(item.OrderNumberTemplate), item.OrderNumberTemplate));
 
             node.Add(AddNullableGuid(nameof(item.BaseCurrencyId), item.BaseCurrencyId));
@@ -142,9 +131,10 @@ namespace Vendr.uSync.Serializers
             var id = node.GetKey();
             var name = node.Element("Name").ValueOrDefault(alias);
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 Store store;
+
                 if (readOnlyStore == null)
                 {
                     store = Store.Create(uow, id, alias, name, false);
@@ -186,7 +176,9 @@ namespace Vendr.uSync.Serializers
                     store.ClearGiftCardPropertyAliases();
                 }
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 store.SetOrderEditorConfig(node.Element(nameof(store.OrderEditorConfig)).ValueOrDefault(store.OrderEditorConfig));
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 // base currency
                 Guid? currencyId = GetCurrencyId(node, nameof(store.BaseCurrencyId));
@@ -226,10 +218,8 @@ namespace Vendr.uSync.Serializers
 
                 _vendrApi.SaveStore(store);
 
-                uow.Complete();
-
-                return SyncAttemptSucceed(name, store.AsReadOnly(), ChangeType.Import, true);
-            }
+                return uow.Complete(SyncAttemptSucceed(name, store.AsReadOnly(), ChangeType.Import, true));
+            });
         }
 
         private void DeserializeAllowedRoles(XElement node, Store store)
@@ -294,7 +284,7 @@ namespace Vendr.uSync.Serializers
             if (item == null) return SyncAttempt<StoreReadOnly>.Fail(node.GetAlias(), ChangeType.ImportFail, "Store Item not set for second pass");
 
             // currency 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 var store = item.AsWritable(uow);
 
@@ -310,10 +300,9 @@ namespace Vendr.uSync.Serializers
                 }
 
                 _vendrApi.SaveStore(store);
-                uow.Complete();
 
-                return SyncAttemptSucceed(store.Name, store.AsReadOnly(), ChangeType.Import, true);
-            }
+                return uow.Complete(SyncAttemptSucceed(store.Name, store.AsReadOnly(), ChangeType.Import, true));
+            });
 
         }
 
@@ -390,12 +379,12 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(StoreReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
                 _vendrApi.SaveStore(entity);
                 uow.Complete();
-            }
+            });
         }
 
         public override void DoDeleteItem(StoreReadOnly item)

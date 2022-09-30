@@ -1,11 +1,5 @@
 ﻿using System;
 
-#if NETFRAMEWORK
-using System.Configuration;
-using System.Linq;
-#endif
-
-
 namespace Vendr.uSync.Configuration
 {
     public class VendrSyncSettings
@@ -24,13 +18,7 @@ namespace Vendr.uSync.Configuration
 
         public VendrSyncPaymentMethodSettings()
         {
-#if NETFRAMEWORK
-            IgnoreSettings = (ConfigurationManager.AppSettings["Vendr.uSync:PaymentMethods:IgnoreSettings"] ?? "")
-                .Split(new[] { "," }, System.StringSplitOptions.RemoveEmptyEntries)
-                .ToArray();
-#else
             IgnoreSettings = Array.Empty<string>();
-#endif
         }
     }
 }

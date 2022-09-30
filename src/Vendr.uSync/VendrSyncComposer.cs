@@ -37,6 +37,8 @@ namespace Vendr.uSync
             UdiParserServiceConnectors.RegisterServiceConnector<EmailTemplateServiceConnector>();
             UdiParserServiceConnectors.RegisterServiceConnector<ExportTemplateServiceConnector>();
             UdiParserServiceConnectors.RegisterServiceConnector<PrintTemplateServiceConnector>();
+
+            // QUESTION: Can the above be replaced now with UdiParser.RegisterUdiType(string entityType, UdiType udiType)?
         }
     }
 }

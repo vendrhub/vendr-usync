@@ -137,6 +137,11 @@ namespace Vendr.uSync.Serializers
                 foreach (var setting in root.Elements("Setting"))
                 {
                     var key = setting.Element("Key").ValueOrDefault(string.Empty);
+
+                    // don't do anything with settings that are in the ignore list. 
+                    if (StringExtensions.InvariantContains(_settingsAccessor.Settings.PaymentMethods.IgnoreSettings, key))
+                        continue;
+
                     if (!string.IsNullOrWhiteSpace(key))
                     {
                         var value = setting.Element("Value").ValueOrDefault(string.Empty);

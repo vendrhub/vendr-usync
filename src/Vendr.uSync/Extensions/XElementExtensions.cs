@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Linq;
 using uSync.Core;
 
@@ -32,5 +33,36 @@ namespace Vendr.uSync.Extensions
 
         public static void AddStoreId(this XElement node, Guid storeId)
             => node.Add(new XElement("StoreId", storeId));
+
+
+        public static XElement AddDictionary(this XElement node, IReadOnlyDictionary<string, string> dictionary)
+        {
+            if (dictionary != null && dictionary.Count > 0)
+            {
+                foreach(var item in dictionary)
+                {
+                    node.Add(new XElement("Value", new XAttribute("Key", item.Key), item.Value));
+                }
+            }
+
+            return node;
+        }
+
+        public static IDictionary<string, string> GetDictionary(this XElement node)
+        {
+            var dictionary = new Dictionary<string, string>();
+            if (node == null || !node.HasElements) return dictionary;
+
+            foreach (var itemNode in node.Elements("Value"))
+            {
+                var key = itemNode.Attribute("Key").ValueOrDefault(string.Empty);
+                var value = itemNode.ValueOrDefault(string.Empty);
+
+                if (!string.IsNullOrEmpty(key))
+                    dictionary.Add(key, value);
+            }
+
+            return dictionary;
+        }
     }
 }

@@ -38,7 +38,10 @@ namespace Vendr.uSync
             UdiParserServiceConnectors.RegisterServiceConnector<ExportTemplateServiceConnector>();
             UdiParserServiceConnectors.RegisterServiceConnector<PrintTemplateServiceConnector>();
 
-            // QUESTION: Can the above be replaced now with UdiParser.RegisterUdiType(string entityType, UdiType udiType)?
+            // QUESTION: Can the above be replaced now with UdiParser.RegisterUdiTye(string entityType, UdiType udiType)?
+
+            // ANSWER: It does appear to work, we will change this in another PR 
+            UdiParser.RegisterUdiType(VendrConstants.UdiEntityType.ProductAttribute, UdiType.GuidUdi);
         }
     }
 }

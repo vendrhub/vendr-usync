@@ -20,6 +20,8 @@
 
             public const string PaymentMethod = "PaymentMethod";
             public const string ShippingMethod = "ShippingMethod";
+
+            public const string ProductAttributes = "ProductAttributes";
         }
 
         internal static class Priorites
@@ -55,6 +57,8 @@
 
             public const int PaymentMethod = VENDR_RESERVED_LOWER + 21; // requires store, countries, currencies
             public const int ShippingMethod = VENDR_RESERVED_LOWER + 22;// requires store, countries, currencies
+
+            public const int ProductAttributes = VENDR_RESERVED_LOWER + 23; // requires store
         }
 
         public static class UdiEntityType

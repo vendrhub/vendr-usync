@@ -1,2 +1,2 @@
-# Vendr uSync
-uSync serializers for Vendr, the eCommerce solution for Umbraco
+# Umbraco Commerce uSync
+uSync serializers for Umbraco Commerce, the eCommerce solution for Umbraco

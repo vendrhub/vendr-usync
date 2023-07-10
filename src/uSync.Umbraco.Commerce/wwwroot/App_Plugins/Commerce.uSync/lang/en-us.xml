@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<language alias="en" intName="English (US)" localName="English (US)" lcid="" culture="en-US">
+	<area alias="usync">
+		<key alias="import-commerce">Import Commerce settings</key>
+		<key alias="report-commerce">Report Commerce settings</key>
+        <key alias="commerce-description">Sync Commerce settings</key>
+	</area>
+</language>

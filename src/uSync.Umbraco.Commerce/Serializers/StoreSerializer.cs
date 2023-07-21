@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Lucene.Net.Codecs.Compressing;
+
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Xml.Linq;
@@ -69,6 +71,11 @@ namespace uSync.Umbraco.Commerce.Serializers
 
             node.Add(AddNullableGuid(nameof(item.ErrorOrderStatusId), item.ErrorOrderStatusId));
             node.Add(AddNullableGuid(nameof(item.ShareStockFromStoreId), item.ShareStockFromStoreId));
+
+            // new to Umbraco.Commerce ?
+
+            // order rounding method 
+            node.Add(new XElement(nameof(item.OrderRoundingMethod), item.OrderRoundingMethod));
 
             SerializeAllowedUsers(node, item);
 
@@ -203,6 +210,11 @@ namespace uSync.Umbraco.Commerce.Serializers
                 // error email template
                 var errorEmailTemplateId = GetEmailTemplateId(node, nameof(store.ErrorEmailTemplateId));
                 store.SetErrorEmailTemplate(errorEmailTemplateId);
+
+                // new for Umbraco.Commerce 
+
+                // order rounding method
+                store.SetOrderRoundingMethod(node.Element(nameof(store.OrderRoundingMethod)).ValueOrDefault(store.OrderRoundingMethod));
 
                 DeserializeAllowedUsers(node, store);
 

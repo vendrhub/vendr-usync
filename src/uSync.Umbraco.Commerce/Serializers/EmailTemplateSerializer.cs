@@ -42,6 +42,9 @@ namespace uSync.Umbraco.Commerce.Serializers
             node.Add(new XElement(nameof(item.Subject), item.Subject));
             node.Add(new XElement(nameof(item.TemplateView), item.TemplateView));
 
+            // new Umbraco.Commerce 
+            node.Add(new XElement(nameof(item.ReplyToAddresses), item.ReplyToAddresses));
+
             return SyncAttemptSucceedIf(node != null, item.Name, node, ChangeType.Export);
         }
 
@@ -83,6 +86,7 @@ namespace uSync.Umbraco.Commerce.Serializers
                 item.SetToAddresses(DeserializeList<string>(node, nameof(item.ToAddresses), "Address"));
                 item.SetBccAddresses(DeserializeList<string>(node, nameof(item.BccAddresses), "Address"));
                 item.SetCcAddresses(DeserializeList<string>(node, nameof(item.CcAddresses), "Address"));
+                item.SetReplyToAddresses(DeserializeList<string>(node, nameof(item.ReplyToAddresses), "Addresses"));
 
                 _CommerceApi.SaveEmailTemplate(item);
 

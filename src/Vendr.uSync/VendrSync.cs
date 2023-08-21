@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-#if NETFRAMEWORK
-using uSync8.BackOffice.Models;
-#else
 using uSync.BackOffice.Models;
-#endif
 
 namespace Vendr.uSync
 {
@@ -15,17 +11,12 @@ namespace Vendr.uSync
     /// <remarks>
     ///  Not strictly required, just lets people see its installed.
     /// </remarks>
-#if NETFRAMEWORK
-    [JsonObject(NamingStrategyType = typeof(DefaultNamingStrategy))]
-    #else
     [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
-    #endif
-
     public class VendrSync : ISyncAddOn
     {
         public string Name => "Vendr.uSync";
 
-        public string Version => "2.0.0";
+        public string Version => "3.0.0";
 
         public string Icon => "icon-store";
 

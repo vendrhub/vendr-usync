@@ -8,34 +8,20 @@ using Vendr.Common;
 using Vendr.uSync.Extensions;
 using Vendr.uSync.Configuration;
 
-#if NETFRAMEWORK
-using Umbraco.Core.Logging;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
-#endif
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
     [SyncSerializer("FA15B3E1-8100-431E-BC95-4B74134A42DD", "OrderStatus Serializer", VendrConstants.Serialization.OrderStatus)]
     public class OrderStatusSerializer : VendrSerializerBase<OrderStatusReadOnly>, ISyncSerializer<OrderStatusReadOnly>
-#if NETFRAMEWORK
-        , ISyncNodeSerializer<OrderStatusReadOnly>
-#endif
     {
         public OrderStatusSerializer(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<OrderStatusSerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif
         { }
 
         protected override SyncAttempt<XElement> SerializeCore(OrderStatusReadOnly item, SyncSerializerOptions options)
@@ -64,9 +50,10 @@ namespace Vendr.uSync.Serializers
             var name = node.Element(nameof(readonlyItem.Name)).ValueOrDefault(alias);
             var storeId = node.GetStoreId();
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 OrderStatus item;
+
                 if (readonlyItem == null)
                 {
                     item = OrderStatus.Create(uow, id, storeId, alias, name);
@@ -82,10 +69,9 @@ namespace Vendr.uSync.Serializers
                 item.SetSortOrder(node.Element(nameof(item.SortOrder)).ValueOrDefault(item.SortOrder));
 
                 _vendrApi.SaveOrderStatus(item);
-                uow.Complete();
 
-                return SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import);
-            }
+                return uow.Complete(SyncAttemptSucceed(name, item.AsReadOnly(), ChangeType.Import));
+            });
         }
 
         public override string GetItemAlias(OrderStatusReadOnly item)
@@ -99,12 +85,14 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(OrderStatusReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
+
                 _vendrApi.SaveOrderStatus(entity);
+
                 uow.Complete();
-            }
+            });
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net472;net5.0</TargetFrameworks>
+        <TargetFrameworks>net6.0</TargetFrameworks>
         <Authors>Vendr, Outfield Digital Ltd</Authors>
         <Company>Outfield Digital Ltd</Company>
         <Copyright>Outfield Digital Ltd</Copyright>
@@ -15,18 +15,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Vendr.Core" Version="2.0.0" />
-        <PackageReference Include="Vendr.Umbraco.Startup" Version="2.0.0" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-        <PackageReference Include="uSync.BackOffice.Core" Version="8.10.3" />
-		<PackageReference Include="Microsoft.Web.Xdt" Version="3.1.0" />
-    </ItemGroup>
-
-    <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-        <PackageReference Include="uSync.Core" Version="9.0.1" />
-        <PackageReference Include="uSync.BackOffice" Version="9.0.1" />
+        <PackageReference Include="Vendr.Core" Version="3.0.0" />
+        <PackageReference Include="Vendr.Umbraco.Startup" Version="3.0.0" />
+        <PackageReference Include="uSync.Core" Version="10.0.0" />
+        <PackageReference Include="uSync.BackOffice" Version="10.0.0" />
     </ItemGroup>
 
     <!-- Workaround for this bug (replace the analyzer name with the one you need to exclude (filename only, no extension) -->

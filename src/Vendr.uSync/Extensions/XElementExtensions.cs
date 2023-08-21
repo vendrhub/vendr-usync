@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Xml.Linq;
-
-#if NETFRAMEWORK
-using uSync8.Core.Extensions;
-#else
 using uSync.Core;
-#endif
 
 namespace Vendr.uSync.Extensions
 {

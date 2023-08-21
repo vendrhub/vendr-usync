@@ -11,13 +11,8 @@ using Vendr.uSync.Extensions;
 using Vendr.uSync.SyncModels;
 using Vendr.uSync.Configuration;
 
-#if NETFRAMEWORK
-using Umbraco.Core.Logging;
-using uSync8.Core.Extensions;
-#else
 using Microsoft.Extensions.Logging;
 using uSync.Core;
-#endif
 
 namespace Vendr.uSync.Serializers
 {
@@ -30,11 +25,7 @@ namespace Vendr.uSync.Serializers
     {
         protected MethodSerializerBase(IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<MethodSerializerBase<TObject>> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif
         { }
 
         protected XElement SerializePrices(IReadOnlyList<ServicePrice> prices)

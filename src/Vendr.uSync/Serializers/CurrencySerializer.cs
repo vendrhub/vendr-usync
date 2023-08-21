@@ -9,20 +9,12 @@ using Vendr.Common;
 using Vendr.uSync.Extensions;
 using Vendr.uSync.Configuration;
 
-#if NETFRAMEWORK
-using Umbraco.Core;
-using Umbraco.Core.Logging;
-using uSync8.Core;
-using uSync8.Core.Extensions;
-using uSync8.Core.Models;
-using uSync8.Core.Serialization;
-#else
 using uSync.Core;
 using uSync.Core.Models;
 using uSync.Core.Serialization;
 using Microsoft.Extensions.Logging;
 using Umbraco.Extensions;
-#endif
+using Vendr.Extensions;
 
 namespace Vendr.uSync.Serializers
 {
@@ -33,11 +25,7 @@ namespace Vendr.uSync.Serializers
         public CurrencySerializer(
             IVendrApi vendrApi, VendrSyncSettingsAccessor settingsAccessor,
             IUnitOfWorkProvider uowProvider,
-#if NETFRAMEWORK
-            ILogger logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#else
             ILogger<CurrencySerializer> logger) : base(vendrApi, settingsAccessor, uowProvider, logger)
-#endif
         {
             _vendrApi = vendrApi;
             _uowProvider = uowProvider;
@@ -75,9 +63,10 @@ namespace Vendr.uSync.Serializers
             var code = node.Element(nameof(readOnlyCurrency.Code)).ValueOrDefault(string.Empty);
             var culture = node.Element(nameof(readOnlyCurrency.CultureName)).ValueOrDefault(string.Empty);
 
-            using (var uow = _uowProvider.Create())
+            return _uowProvider.Execute(uow =>
             {
                 Currency currency;
+
                 if (readOnlyCurrency == null)
                 {
                     currency = Currency.Create(uow, id, storeId, code, name, culture);
@@ -101,10 +90,9 @@ namespace Vendr.uSync.Serializers
 
                 _vendrApi.SaveCurrency(currency);
 
-                uow.Complete();
+                return uow.Complete(SyncAttemptSucceed(name, currency.AsReadOnly(), ChangeType.Import, true));
 
-                return SyncAttemptSucceed(name, currency.AsReadOnly(), ChangeType.Import, true);
-            }
+            });
         }
 
         private void DeserializeCountries(XElement node, Currency currency)
@@ -145,12 +133,14 @@ namespace Vendr.uSync.Serializers
 
         public override void DoSaveItem(CurrencyReadOnly item)
         {
-            using (var uow = _uowProvider.Create())
+            _uowProvider.Execute(uow =>
             {
                 var entity = item.AsWritable(uow);
+
                 _vendrApi.SaveCurrency(entity);
+
                 uow.Complete();
-            }
+            });
         }
 
         public override void DoDeleteItem(CurrencyReadOnly item)

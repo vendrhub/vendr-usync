@@ -16,7 +16,7 @@ namespace Vendr.uSync
     {
         public string Name => "Vendr.uSync";
 
-        public string Version => "2.0.0";
+        public string Version => "3.0.0";
 
         public string Icon => "icon-store";
 
